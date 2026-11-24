@@ -1,0 +1,33 @@
+{
+  "name": "turborepo_template-org",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "check": "turbo run check",
+    "check:api-contract": "pnpm generate:api && git diff --exit-code -- apps/api/openapi/openapi.json apps/web/src/generated/api",
+    "clean": "turbo run clean",
+    "dev": "turbo run dev",
+    "format": "turbo run format",
+    "generate:api": "pnpm --filter api generate:openapi && pnpm --filter @workspace/openapi-codegen generate",
+    "lint-staged": "lint-staged",
+    "prepare": "husky",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@commitlint/cli": "^21.2.1",
+    "@commitlint/config-conventional": "^21.2.0",
+    "@workspace/biome-config": "workspace:*",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.8",
+    "turbo": "^2.10.4",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@11.10.0",
+  "engines": {
+    "node": ">=22.14",
+    "pnpm": ">=11"
+  }
+}
