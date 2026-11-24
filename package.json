@@ -4,6 +4,7 @@
   "scripts": {
     "build": "turbo run build",
     "check": "biome check .",
+    "check:ui-conventions": "node scripts/check-ui-conventions.mjs",
     "check:api-contract": "pnpm generate:api && git add --intent-to-add -- apps/api/openapi apps/web/src/generated/api && git diff --exit-code -- apps/api/openapi apps/web/src/generated/api",
     "clean": "turbo run clean",
     "dev": "turbo run dev",
@@ -11,7 +12,7 @@
     "generate:api": "pnpm --filter api generate:openapi && pnpm --filter @workspace/openapi-codegen generate",
     "lint-staged": "lint-staged",
     "prepare": "husky",
-    "test": "turbo run test",
+    "test": "turbo run test && node --test 'scripts/*.test.mjs'",
     "test:coverage": "turbo run test:coverage",
     "typecheck": "turbo run typecheck"
   },

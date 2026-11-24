@@ -38,6 +38,9 @@ jobs:
       - name: Biome check
         run: pnpm check
 
+      - name: UI conventions check
+        run: pnpm check:ui-conventions
+
       - name: Typecheck
         run: pnpm typecheck
 

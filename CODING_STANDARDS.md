@@ -150,6 +150,7 @@ comments).
   by breaking the code.
 - Screen tests query by role and import expected texts from the messages
   module.
+- A pull request tests one seam, in one test file.
 
 ## UI
 
@@ -159,7 +160,8 @@ comments).
   theme, never inlined.
 - Every control works with the keyboard and shows a visible focus ring.
 
-`pnpm check:ui-conventions` enforces the first two rules once #3 lands.
+`pnpm check:ui-conventions` enforces the first two rules in CI and on
+commit (ADR 0003).
 
 ## Commits and pull requests
 
@@ -167,6 +169,8 @@ comments).
   commit on `main`. It follows
   [Conventional Commits](https://www.conventionalcommits.org/) like local
   commits, which only the `commit-msg` hook checks.
+- A pull request holds a single commit: amend it rather than stacking
+  fix-up commits.
 - The description references its issue (`Closes #2`, `Refs #1`).
 - A decision a newcomer would ask about is recorded as a short ADR in
   `docs/adr`.

@@ -1,0 +1,18 @@
+body {
+  min-width: var(--mantine-body-min-width);
+}
+
+.skip-link {
+  position: absolute;
+  inset-block-start: var(--mantine-spacing-md);
+  inset-inline-start: var(--mantine-spacing-md);
+  z-index: var(--mantine-skip-link-z-index);
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+  border-radius: var(--mantine-radius-md);
+  background-color: var(--mantine-color-body);
+  box-shadow: var(--mantine-shadow-md);
+}
+
+.skip-link:not(:focus) {
+  transform: translateY(-200%);
+}

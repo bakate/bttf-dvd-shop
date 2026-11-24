@@ -53,7 +53,7 @@ appelle donc l'API par des URLs relatives.
 | `pnpm dev`                | Lance l'API et le frontend en mode watch                    |
 | `pnpm build`              | Compile l'API et le frontend                                |
 | `pnpm typecheck`          | Vérifie les types de tous les workspaces                    |
-| `pnpm test`               | Lance les tests Vitest                                      |
+| `pnpm test`               | Lance les tests Vitest et ceux de `scripts/`                |
 | `pnpm test:coverage`      | Lance les tests avec la couverture                          |
 | `pnpm check`              | Lint et format Biome sur tout le dépôt (sans écriture)      |
 | `pnpm format`             | Formate tout le dépôt avec Biome                            |
@@ -71,6 +71,7 @@ tooling/
   biome-config/       Configuration Biome partagée
   openapi-codegen/    Génération des types frontend depuis le contrat OpenAPI
   typescript/         Configurations TypeScript partagées
+scripts/              Vérification des conventions UI
 docs/
   adr/                Décisions d'architecture
   agents/             Configuration des agents (suivi des issues, labels, domaine)
@@ -92,6 +93,18 @@ Variables d'environnement, validées au démarrage :
 | `CORS_ORIGIN`           | absent        | Origine autorisée en CORS                  |
 | `API_RATE_LIMIT_TTL_MS` | `60000`       | Fenêtre du rate limiting, en millisecondes |
 | `API_RATE_LIMIT_LIMIT`  | `100`         | Nombre maximum de requêtes par fenêtre     |
+
+## Design system
+
+Le frontend repose sur un thème Mantine dédié (`apps/web/src/theme/theme.ts`) :
+palettes de 10 nuances, polices auto-hébergées, tailles des titres, anneau de
+focus, réduction des animations, mode clair uniquement.
+
+La règle : **un token manquant s'ajoute au thème, il ne s'écrit jamais en
+dur.** Aucun nombre magique (`14.5px`, `200px`, `150ms`, couleur) ni `style` inline
+hors du thème, aucun CSS hors de `apps/web/src/global.css`, et tous les textes
+dans `apps/web/src/messages.ts`. `pnpm check:ui-conventions` le vérifie en CI et
+à chaque commit.
 
 ## Contrat d'API
 
