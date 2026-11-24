@@ -2,6 +2,10 @@ import "reflect-metadata";
 
 import { createApp } from "../app.factory";
 import type { AppConfig } from "../config/app.config";
+import {
+  CART_CONTROLLER_PATH,
+  CART_PRICE_PATH,
+} from "../modules/pricing/presentation/cart-routes";
 import { API_GLOBAL_PREFIX } from "../shared/presentation/api-routes";
 
 type HttpReply = {
@@ -18,6 +22,7 @@ type EnvironmentVariables = Partial<Record<keyof AppConfig, string>>;
 export type SystemUnderTest = {
   checkHealth(): Promise<HttpReply>;
   checkHealthFromOrigin(origin: string): Promise<CrossOriginReply>;
+  priceCart(body: unknown): Promise<HttpReply>;
   close(): Promise<void>;
 };
 
@@ -47,6 +52,18 @@ export async function createSystemUnderTest({
       return {
         allowedOrigin: response.headers.get("access-control-allow-origin"),
       };
+    },
+    priceCart: async (body) => {
+      const response = await fetch(
+        `${apiUrl}/${CART_CONTROLLER_PATH}/${CART_PRICE_PATH}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        },
+      );
+
+      return { statusCode: response.status, body: await response.json() };
     },
     close: async () => {
       await app.close();
