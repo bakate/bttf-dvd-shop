@@ -10,12 +10,6 @@
       "cache": false,
       "persistent": true
     },
-    "check": {
-      "dependsOn": ["^check"]
-    },
-    "format": {
-      "cache": false
-    },
     "typecheck": {
       "dependsOn": ["^build"],
       "outputs": [".cache/tsbuildinfo.json"]
@@ -33,8 +27,6 @@
     "CI",
     "npm_lifecycle_event",
     "PORT",
-    "PUBLIC_BASE_URL",
-    "WEB_APP_URL",
     "CORS_ORIGIN",
     "API_RATE_LIMIT_TTL_MS",
     "API_RATE_LIMIT_LIMIT"

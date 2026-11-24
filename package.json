@@ -1,13 +1,13 @@
 {
-  "name": "turborepo_template-org",
+  "name": "bttf-dvd-shop",
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "check": "turbo run check",
-    "check:api-contract": "pnpm generate:api && git diff --exit-code -- apps/api/openapi/openapi.json apps/web/src/generated/api",
+    "check": "biome check .",
+    "check:api-contract": "pnpm generate:api && git add --intent-to-add -- apps/api/openapi apps/web/src/generated/api && git diff --exit-code -- apps/api/openapi apps/web/src/generated/api",
     "clean": "turbo run clean",
     "dev": "turbo run dev",
-    "format": "turbo run format",
+    "format": "biome format --write .",
     "generate:api": "pnpm --filter api generate:openapi && pnpm --filter @workspace/openapi-codegen generate",
     "lint-staged": "lint-staged",
     "prepare": "husky",
@@ -17,17 +17,17 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "@commitlint/cli": "^21.2.1",
-    "@commitlint/config-conventional": "^21.2.0",
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
     "@workspace/biome-config": "workspace:*",
     "husky": "^9.1.7",
-    "lint-staged": "^17.0.8",
-    "turbo": "^2.10.4",
+    "lint-staged": "^17.6.2",
+    "turbo": "^2.11.13",
     "typescript": "catalog:"
   },
-  "packageManager": "pnpm@11.10.0",
+  "packageManager": "pnpm@11.29.0",
   "engines": {
-    "node": ">=22.14",
+    "node": "^26.13.0",
     "pnpm": ">=11"
   }
 }

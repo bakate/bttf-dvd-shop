@@ -2,33 +2,22 @@ import "reflect-metadata";
 
 import { Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { NestFactory } from "@nestjs/core";
-import helmet from "helmet";
 
-import { AppModule } from "./modules/app.module";
-import { setupApiDocumentation } from "./shared/presentation/api-documentation";
+import { createApp, type TypedConfigService } from "./app.factory";
+import { API_GLOBAL_PREFIX } from "./shared/presentation/api-routes";
 
 async function bootstrap(): Promise<void> {
-	const app = await NestFactory.create(AppModule);
-	const configService = app.get(ConfigService);
-	const port = configService.getOrThrow<number>("PORT");
+  const app = await createApp({ logger: true });
+  const port = app
+    .get<TypedConfigService>(ConfigService)
+    .get("PORT", { infer: true });
 
-	app.use(helmet());
-	app.setGlobalPrefix("api");
-	app.enableShutdownHooks();
-	setupApiDocumentation({ app });
+  await app.listen(port);
 
-	const allowedOrigin = configService.get<string>("CORS_ORIGIN");
-
-	if (allowedOrigin !== undefined && allowedOrigin.length > 0) {
-		app.enableCors({
-			origin: allowedOrigin,
-		});
-	}
-
-	await app.listen(port);
-
-	Logger.log(`API listening on http://localhost:${port}/api`, "Bootstrap");
+  Logger.log(
+    `API listening on http://localhost:${port}/${API_GLOBAL_PREFIX}`,
+    "Bootstrap",
+  );
 }
 
 void bootstrap();
