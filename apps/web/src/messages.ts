@@ -8,4 +8,10 @@ export const messages = {
     title: "Boutique DVD Retour vers le futur",
   },
   skipLink: "Aller au contenu principal",
+  cartPricing: {
+    basketLabel: "Panier",
+    basketDescription: "Un titre de film par ligne.",
+    calculate: "Calculer",
+    totalLabel: "Total",
+  },
 } as const;

@@ -6,6 +6,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { type AppConfig, validateAppConfig } from "../config/app.config";
 import { HttpExceptionFilter } from "../shared/presentation/http-exception.filter";
 import { HealthController } from "./health/presentation/health.controller";
+import { PricingModule } from "./pricing/pricing.module";
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { HealthController } from "./health/presentation/health.controller";
         },
       ],
     }),
+    PricingModule,
   ],
   controllers: [HealthController],
   providers: [

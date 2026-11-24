@@ -34,6 +34,69 @@
           "Health"
         ]
       }
+    },
+    "/api/cart/price": {
+      "post": {
+        "operationId": "CartPriceController_price",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "basket"
+                ],
+                "properties": {
+                  "basket": {
+                    "type": "string",
+                    "description": "The cart as plain text, one movie title per line.",
+                    "example": "Back to the Future 1\nBack to the Future 2\nLa chèvre"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The cart price.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "total",
+                    "currency"
+                  ],
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Total price of the cart, in euro cents.",
+                      "example": 4700
+                    },
+                    "currency": {
+                      "type": "string",
+                      "enum": [
+                        "EUR"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The cart cannot be priced."
+          }
+        },
+        "summary": "Price a cart",
+        "tags": [
+          "Cart"
+        ]
+      }
     }
   },
   "info": {
@@ -45,6 +108,10 @@
   "tags": [
     {
       "name": "Health",
+      "description": ""
+    },
+    {
+      "name": "Cart",
       "description": ""
     }
   ],

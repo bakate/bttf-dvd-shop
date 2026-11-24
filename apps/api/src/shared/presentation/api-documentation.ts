@@ -66,6 +66,7 @@ export function createApiDocument({
     .setDescription("Prices Back to the Future DVD carts.")
     .setVersion("0.1.0")
     .addTag("Health")
+    .addTag("Cart")
     .build();
 
   return SwaggerModule.createDocument(app, config);
