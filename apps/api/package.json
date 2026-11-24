@@ -1,43 +1,40 @@
 {
-	"name": "api",
-	"version": "0.1.0",
-	"private": true,
-	"main": "dist/main.js",
-	"scripts": {
-		"build": "tsc -p tsconfig.build.json",
-		"check": "biome check .",
-		"clean": "rm -rf dist coverage .turbo .cache",
-		"dev": "tsx watch src/main.ts",
-		"format": "biome format --write .",
-		"generate:openapi": "tsx scripts/generate-openapi.ts",
-		"start": "node dist/main.js",
-		"test": "vitest run",
-		"test:coverage": "vitest run --coverage",
-		"test:watch": "vitest --watch",
-		"typecheck": "tsc -p tsconfig.json --noEmit"
-	},
-	"dependencies": {
-		"@nestjs/common": "11.1.28",
-		"@nestjs/config": "4.0.4",
-		"@nestjs/core": "11.1.28",
-		"@nestjs/platform-express": "11.1.28",
-		"@nestjs/swagger": "11.4.5",
-		"@nestjs/throttler": "6.5.0",
-		"@scalar/nestjs-api-reference": "1.2.9",
-		"helmet": "8.2.0",
-		"reflect-metadata": "0.2.2",
-		"rxjs": "7.8.2",
-		"zod": "catalog:"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "catalog:",
-		"@faker-js/faker": "catalog:",
-		"@types/node": "catalog:",
-		"@vitest/coverage-v8": "catalog:",
-		"@workspace/biome-config": "workspace:*",
-		"@workspace/tsconfig": "workspace:*",
-		"tsx": "4.23.0",
-		"typescript": "catalog:",
-		"vitest": "catalog:"
-	}
+  "name": "api",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist coverage .turbo .cache",
+    "dev": "tsx watch src/main.ts",
+    "generate:openapi": "tsx scripts/generate-openapi.ts",
+    "start": "node dist/main.js",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@nestjs/common": "11.2.11",
+    "@nestjs/config": "4.0.4",
+    "@nestjs/core": "11.2.11",
+    "@nestjs/platform-express": "11.2.11",
+    "@nestjs/swagger": "11.4.8",
+    "@nestjs/throttler": "6.8.0",
+    "@scalar/nestjs-api-reference": "1.2.41",
+    "helmet": "8.3.0",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "@workspace/biome-config": "workspace:*",
+    "@workspace/tsconfig": "workspace:*",
+    "tsx": "4.23.15",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
 }

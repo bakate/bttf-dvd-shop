@@ -1,298 +1,118 @@
-# Turborepo Template
+# BTTF DVD Shop
 
-A modern full-stack Turborepo template with a Nest.js API, a React/Vite frontend,
-feature-local client models and XState application machines, Mantine UI exports,
-and a strict TypeScript/Biome toolchain.
+Application web de calcul du prix d'un panier de DVD, avec la promotion
+_Retour vers le futur_. Le cahier des charges complet est dans l'issue
+[#1](https://github.com/bakate/bttf-dvd-shop/issues/1).
 
-Maintained by [Bakate](https://github.com/bakate/turborepo-template).
+Le projet part du template Turborepo de l'auteur
+([bakate/turborepo-template](https://github.com/bakate/turborepo-template)),
+débarrassé de son code d'exemple.
 
 ## Stack
 
-- **Monorepo**: Turborepo + pnpm workspaces
-- **Backend**: Nest.js, DDD, hexagonal architecture, Zod validation, Scalar docs
-- **Frontend**: React, Vite, Mantine through a workspace UI package
-- **Application state**: XState machines colocated with frontend features
-- **Client models**: Feature-local TypeScript models with Zod validation
-- **Quality**: Biome, Vitest, strict TypeScript, Husky, Commitlint, lint-staged
+- **Monorepo** : Turborepo + workspaces pnpm
+- **API** : NestJS 11, Zod, Helmet, rate limiting, documentation Scalar
+- **Frontend** : React 19, Vite 8, Mantine 9
+- **Qualité** : TypeScript strict, Biome, Vitest, Husky, Commitlint,
+  lint-staged
 
-## Requirements
+## Prérequis
 
-- Node.js `>=22.14`
-- pnpm `>=11`
+- Node.js **26 LTS**, seule version supportée (déclarée dans `.nvmrc`). Avec
+  nvm : `nvm use`.
+- pnpm 11, dont la version exacte est fixée par `packageManager`. Avec
+  Corepack : `corepack enable`.
 
-## Quick Start
+`pnpm install` échoue volontairement avec une autre version de Node
+(`engineStrict`).
+
+## Démarrage
 
 ```sh
 pnpm install
 pnpm dev
 ```
 
-Default local URLs:
+URLs locales :
 
-- API: `http://localhost:3000/api`
-- API docs: `http://localhost:3000/api/docs`
-- OpenAPI JSON: `http://localhost:3000/api/docs/openapi.json`
-- Web: `http://localhost:5173`
+| Service        | URL                                           |
+| :------------- | :-------------------------------------------- |
+| Frontend       | `http://localhost:5173`                       |
+| API            | `http://localhost:3000/api`                   |
+| Health check   | `http://localhost:3000/api/health`            |
+| Documentation  | `http://localhost:3000/api/docs`              |
+| OpenAPI (JSON) | `http://localhost:3000/api/docs/openapi.json` |
+
+Le serveur Vite redirige `/api` vers `http://localhost:3000`, le frontend
+appelle donc l'API par des URLs relatives.
 
 ## Scripts
 
-| Command | Description |
-| :-- | :-- |
-| `pnpm dev` | Start development tasks through Turborepo |
-| `pnpm build` | Build/typecheck all buildable apps and packages |
-| `pnpm test` | Run tests across the monorepo |
-| `pnpm test:coverage` | Run tests with coverage where configured |
-| `pnpm check` | Run Biome checks and write safe fixes |
-| `pnpm generate:api` | Generate OpenAPI JSON and frontend API types |
-| `pnpm check:api-contract` | Fail when committed API artifacts are stale |
-| `pnpm format` | Run Biome formatting |
-| `pnpm lint` | Run Biome linting |
-| `pnpm clean` | Remove local build/cache artifacts per workspace |
+| Commande                  | Rôle                                                        |
+| :------------------------ | :---------------------------------------------------------- |
+| `pnpm dev`                | Lance l'API et le frontend en mode watch                    |
+| `pnpm build`              | Compile l'API et le frontend                                |
+| `pnpm typecheck`          | Vérifie les types de tous les workspaces                    |
+| `pnpm test`               | Lance les tests Vitest                                      |
+| `pnpm test:coverage`      | Lance les tests avec la couverture                          |
+| `pnpm check`              | Lint et format Biome sur tout le dépôt (sans écriture)      |
+| `pnpm format`             | Formate tout le dépôt avec Biome                            |
+| `pnpm generate:api`       | Régénère le document OpenAPI et les types du frontend       |
+| `pnpm check:api-contract` | Échoue si les artefacts du contrat d'API ne sont pas à jour |
+| `pnpm clean`              | Supprime les artefacts de build et les caches               |
 
-Recommended validation before committing:
-
-```sh
-pnpm check
-pnpm test
-pnpm build
-```
-
-## Workspace Layout
+## Structure
 
 ```txt
 apps/
-  api/        Nest.js HTTP API
-  web/        React + Vite frontend
-
-packages/
-  ui/           Mantine facade with explicit package exports
-
+  api/                NestJS : modules métier, documentation, configuration
+  web/                React + Vite + Mantine
 tooling/
-  biome-config/  Shared Biome configuration
-  typescript/    Shared TypeScript configurations
-  openapi-codegen/ Isolated OpenAPI type-generation tooling
-  vitest-config/ Shared Vitest configuration helpers
+  biome-config/       Configuration Biome partagée
+  openapi-codegen/    Génération des types frontend depuis le contrat OpenAPI
+  typescript/         Configurations TypeScript partagées
+docs/
+  adr/                Décisions d'architecture
+  agents/             Configuration des agents (suivi des issues, labels, domaine)
 ```
 
-## Backend Architecture
+## API
 
-The API lives in `apps/api` and uses a light DDD + hexagonal structure per
-module.
+L'application est construite à un seul endroit, `createApp`
+(`apps/api/src/app.factory.ts`), qu'utilisent le serveur, le générateur
+OpenAPI et les tests HTTP. Les modules métier vivent dans
+`apps/api/src/modules`.
 
-```txt
-apps/api/src/modules/todos/
-  domain/          Entity and business rules
-  application/     Use cases and ports
-  infrastructure/  Technical adapters, repositories, providers
-  presentation/    HTTP controllers, request DTOs, OpenAPI schemas
-```
+Variables d'environnement, validées au démarrage :
 
-Rules:
+| Variable                | Défaut        | Rôle                                       |
+| :---------------------- | :------------ | :----------------------------------------- |
+| `NODE_ENV`              | `development` | `development`, `test` ou `production`      |
+| `PORT`                  | `3000`        | Port HTTP de l'API                         |
+| `CORS_ORIGIN`           | absent        | Origine autorisée en CORS                  |
+| `API_RATE_LIMIT_TTL_MS` | `60000`       | Fenêtre du rate limiting, en millisecondes |
+| `API_RATE_LIMIT_LIMIT`  | `100`         | Nombre maximum de requêtes par fenêtre     |
 
-- `domain` contains business rules and has no Nest dependency.
-- `application` contains plain TypeScript use cases and ports, with no Nest
-  dependency or decorators.
-- `infrastructure` implements ports.
-- `presentation` maps HTTP requests/responses to application use cases.
-- Controllers stay thin. They validate input, call use cases, and map errors.
+## Contrat d'API
 
-The API currently includes:
+L'API possède le contrat HTTP. `pnpm generate:api` produit :
 
-- Helmet security headers
-- Rate limiting with `@nestjs/throttler`
-- Zod request validation
-- Stable error response body
-- Environment validation at startup
-- Scalar API documentation
+- `apps/api/openapi/openapi.json`, généré depuis l'application NestJS ;
+- `apps/web/src/generated/api`, les types TypeScript du frontend.
 
-Error response shape:
+Ces fichiers sont versionnés et ne s'éditent jamais à la main. La CI échoue
+s'ils ne correspondent plus au code (`pnpm check:api-contract`).
 
-```json
-{
-  "error": {
-    "code": "VALIDATION_FAILED",
-    "message": "Request validation failed.",
-    "details": []
-  }
-}
-```
+## Qualité et CI
 
-Environment variables:
+Chaque pull request passe par le job **Quality gate**
+(`.github/workflows/ci.yml`), obligatoire pour merger sur `main`. En local,
+le hook `pre-commit` lance Biome sur les fichiers indexés et le hook
+`commit-msg` vérifie le message de commit.
 
-| Variable | Default | Description |
-| :-- | :-- | :-- |
-| `PORT` | `3000` | API HTTP port |
-| `CORS_ORIGIN` | unset | Allowed CORS origin |
-| `API_RATE_LIMIT_TTL_MS` | `60000` | Rate-limit window in milliseconds |
-| `API_RATE_LIMIT_LIMIT` | `100` | Max requests per rate-limit window |
+## Pour contribuer
 
-## Frontend Architecture
-
-The frontend lives in `apps/web`. React stays mostly responsible for UI
-composition. Frontend workflows are colocated with the feature that owns them.
-
-```txt
-apps/web/src/
-  features/
-    todos/
-      application/  Framework-agnostic XState machines and ports
-      infrastructure/ Browser adapters and HTTP gateways
-      model/        Client models and runtime response validation
-      *.ts          React hooks that connect UI to application machines
-  main.tsx         App composition
-```
-
-The Vite dev server proxies `/api` to `http://localhost:3000`, so the web app can
-call API routes through relative URLs.
-
-## API Contract Generation
-
-The API owns the HTTP contract. `pnpm generate:api` creates:
-
-- `apps/api/openapi/openapi.json` directly from the Nest application
-- `apps/web/src/generated/api/types.gen.ts` from that local OpenAPI document
-
-The generated types are consumed directly by the feature HTTP gateway. Runtime
-responses still pass through the feature Zod parser because generated TypeScript
-types do not validate untrusted JSON.
-
-The code generator is isolated in `tooling/openapi-codegen` with TypeScript 6.
-This prevents its compiler-API dependency from forcing the TypeScript 7
-applications to downgrade. Generated files must not be edited manually.
-
-## Frontend Models
-
-`apps/web/src/features/todos/model` contains the client representation of todos
-and the Zod parsing used at HTTP boundaries. It is intentionally separate from
-the backend domain entity.
-
-Example responsibilities:
-
-- Branded identifiers
-- Entity/value object validation
-- Runtime validation for remote data
-- Client-model tests
-
-Do not import React, Nest, HTTP clients, browser APIs, or database clients into
-the model.
-
-## Frontend Application Layer
-
-`apps/web/src/features/todos/application` contains the framework-agnostic
-workflows owned by the todos frontend feature. It currently uses XState machines
-for todo flows.
-
-The React hooks import their machines directly from the feature:
-
-```ts
-import { createTodoMachine } from "./application/machines/create-todo.machine";
-import { todoListMachine } from "./application/machines/todo-list.machine";
-```
-
-The machines and ports remain independent from React and browser APIs. Avoid
-barrel files such as `index.ts`; use explicit module imports.
-
-### Gateways
-
-A gateway is an application port. It describes what the application needs from
-the outside world without knowing how it is implemented.
-
-```txt
-XState machine
-  -> TodoGateway port
-    -> TodoHttpGateway adapter in apps/web
-```
-
-Example:
-
-- `TodoGateway`: application contract
-- `TodoHttpGateway`: browser HTTP implementation using `fetch`
-
-This keeps workflows reusable if the UI changes from React to another frontend
-framework.
-
-## UI Package
-
-`packages/ui` is a Mantine facade. It does not define custom design-system
-components. It re-exports Mantine APIs through explicit entrypoints.
-
-Example imports:
-
-```ts
-import { Button, Stack, TextInput } from "@workspace/ui/core";
-import "@workspace/ui/styles.css";
-```
-
-Rules:
-
-- Prefer Mantine primitives directly through `@workspace/ui/*` exports.
-- Do not create custom CSS-heavy UI abstractions in the template.
-- Add new Mantine package entrypoints through `package.json#exports` instead of
-  a barrel file.
-
-## Testing
-
-Use Vitest for unit tests. Use `@faker-js/faker` for generated test data, but keep
-assertions deterministic by storing generated values in local constants.
-
-Good pattern:
-
-```ts
-const todoTitle = faker.lorem.words({ min: 2, max: 5 });
-
-expect(result.value.title).toBe(todoTitle);
-```
-
-When a client-model type is branded, build fixtures through its parser instead
-of casting or manually shaping objects.
-
-## Code Style
-
-- TypeScript strict mode is enabled.
-- No `any` for application code.
-- Prefer explicit return-value errors over thrown business errors.
-- Use `readonly` data shapes where possible.
-- Use package `exports` for public APIs.
-- Keep imports scoped to the layer that owns the dependency.
-
-## Tooling
-
-Biome is the formatter and linter. VS Code should use the Biome extension as the
-default formatter for this workspace. Prettier and ESLint are intentionally not
-part of the active formatting path.
-
-Shared config lives in `tooling/biome-config` and is consumed by workspace-level
-`biome.json` files.
-
-## Git Hooks and CI
-
-The template includes Husky, Commitlint, and lint-staged.
-
-Commit messages should follow Conventional Commits:
-
-```txt
-feat: add todo creation machine
-fix: handle invalid todo gateway response
-```
-
-GitHub Actions are configured to install dependencies and run repository quality
-checks.
-
-## Remote Caching
-
-Turborepo remote caching can be enabled when needed:
-
-```sh
-npx turbo login
-npx turbo link
-```
-
-## Useful Links
-
-- [Turborepo](https://turbo.build/repo/docs)
-- [Nest.js](https://docs.nestjs.com/)
-- [XState](https://stately.ai/docs/xstate)
-- [Mantine](https://mantine.dev/)
-- [Biome](https://biomejs.dev/)
-- [Zod](https://zod.dev/)
-- [Vitest](https://vitest.dev/)
+- [`CODING_STANDARDS.md`](CODING_STANDARDS.md) : les règles d'écriture du
+  code, des tests et des commits.
+- [`docs/adr`](docs/adr) : les décisions d'architecture et leurs raisons.
+- [`AGENTS.md`](AGENTS.md) : le point d'entrée des agents de code.

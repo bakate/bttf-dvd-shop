@@ -23,7 +23,8 @@ module.exports = {
             title: "Styles",
           },
           refactor: {
-            description: "A code change that neither fixes a bug nor adds a feature",
+            description:
+              "A code change that neither fixes a bug nor adds a feature",
             title: "Code Refactoring",
           },
           perf: {
@@ -55,10 +56,12 @@ module.exports = {
         },
       },
       scope: {
-        description: "What is the scope of this change (e.g. a feature or a component or file name)",
+        description:
+          "What is the scope of this change (e.g. a feature or a component or file name)",
       },
       subject: {
-        description: "Write a short, imperative tense description of the change",
+        description:
+          "Write a short, imperative tense description of the change",
       },
       body: {
         description: "Provide a longer description of the change",

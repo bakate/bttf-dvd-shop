@@ -5,34 +5,35 @@ const defaultRateLimitTtlMs = 60_000;
 const defaultRateLimitLimit = 100;
 
 const appConfigSchema = z.object({
-	PORT: z.coerce.number().int().positive().default(defaultPort),
-	PUBLIC_BASE_URL: z.url().default("http://localhost:3000/api"),
-	WEB_APP_URL: z.url().default("http://localhost:5173"),
-	CORS_ORIGIN: z.string().trim().min(1).optional(),
-	API_RATE_LIMIT_TTL_MS: z.coerce
-		.number()
-		.int()
-		.positive()
-		.default(defaultRateLimitTtlMs),
-	API_RATE_LIMIT_LIMIT: z.coerce
-		.number()
-		.int()
-		.positive()
-		.default(defaultRateLimitLimit),
+  NODE_ENV: z
+    .enum(["development", "test", "production"])
+    .default("development"),
+  PORT: z.coerce.number().int().positive().default(defaultPort),
+  CORS_ORIGIN: z.string().trim().min(1).optional(),
+  API_RATE_LIMIT_TTL_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(defaultRateLimitTtlMs),
+  API_RATE_LIMIT_LIMIT: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(defaultRateLimitLimit),
 });
 
 export type AppConfig = z.infer<typeof appConfigSchema>;
 
 export function validateAppConfig(config: Record<string, unknown>): AppConfig {
-	const result = appConfigSchema.safeParse(config);
+  const result = appConfigSchema.safeParse(config);
 
-	if (result.success) {
-		return result.data;
-	}
+  if (result.success) {
+    return result.data;
+  }
 
-	const message = result.error.issues
-		.map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-		.join("; ");
+  const message = result.error.issues
+    .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+    .join("; ");
 
-	throw new Error(`Invalid API environment configuration: ${message}`);
+  throw new Error(`Invalid API environment configuration: ${message}`);
 }
