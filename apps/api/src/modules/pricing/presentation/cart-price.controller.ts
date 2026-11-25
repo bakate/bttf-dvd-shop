@@ -14,19 +14,18 @@ import {
   ApiPayloadTooLargeResponse,
   ApiTags,
 } from "@nestjs/swagger";
-
+import {
+  type PriceCartError,
+  PriceCartUseCase,
+} from "#src/modules/pricing/application/price-cart.use-case";
+import type { PriceBreakdown } from "#src/modules/pricing/domain/cart-pricing";
+import { CURRENCY } from "#src/modules/pricing/domain/euro-cents";
 import {
   PROBLEM_JSON_MEDIA_TYPE,
   ProblemDetailsException,
   problemDetailsOpenApiSchema,
   requestProblems,
-} from "../../../shared/presentation/problem-details";
-import {
-  type PriceCartError,
-  PriceCartUseCase,
-} from "../application/price-cart.use-case";
-import type { PriceBreakdown } from "../domain/cart-pricing";
-import { CURRENCY } from "../domain/euro-cents";
+} from "#src/shared/presentation/problem-details";
 import { type BasketError, readBasketLines } from "./basket-lines";
 import {
   type CartPriceResponse,

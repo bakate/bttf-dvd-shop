@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createSystemUnderTest } from "../test/create-system-under-test";
+import { createSystemUnderTest } from "#src/modules/pricing/test/create-system-under-test";
 import { EMPTY_CART_ERROR_CODE } from "./cart";
 
 describe("Pricing module: price a cart from its lines", () => {

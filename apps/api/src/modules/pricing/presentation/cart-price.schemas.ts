@@ -1,8 +1,8 @@
 import type { SchemaObject } from "@nestjs/swagger";
 import { z } from "zod";
 
-import { CURRENCY } from "../domain/euro-cents";
-import { MOVIE_KINDS } from "../domain/movie";
+import { CURRENCY } from "#src/modules/pricing/domain/euro-cents";
+import { MOVIE_KINDS } from "#src/modules/pricing/domain/movie";
 
 export const cartPriceRequestSchema = z.object({
   basket: z.string().meta({

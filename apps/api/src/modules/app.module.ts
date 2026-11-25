@@ -7,9 +7,9 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { LoggerModule } from "nestjs-pino";
 import type { DestinationStream } from "pino";
 
-import { type AppConfig, validateAppConfig } from "../config/app.config";
-import { HttpExceptionFilter } from "../shared/presentation/http-exception.filter";
-import { REQUEST_ID_HEADER } from "../shared/presentation/request-id";
+import { type AppConfig, validateAppConfig } from "#src/config/app.config";
+import { HttpExceptionFilter } from "#src/shared/presentation/http-exception.filter";
+import { REQUEST_ID_HEADER } from "#src/shared/presentation/request-id";
 import { HealthController } from "./health/presentation/health.controller";
 import { PricingModule } from "./pricing/pricing.module";
 

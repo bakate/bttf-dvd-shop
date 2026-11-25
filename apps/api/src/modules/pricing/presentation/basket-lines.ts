@@ -1,6 +1,6 @@
 import { type ZodError, z } from "zod";
 
-import { failure, type Result, success } from "../../../shared/result";
+import { failure, type Result, success } from "#src/shared/result";
 
 export const MAX_BASKET_LINES = 500;
 export const MAX_BASKET_LINE_LENGTH = 200;
