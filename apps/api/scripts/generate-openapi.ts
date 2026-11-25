@@ -3,8 +3,8 @@ import "reflect-metadata";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-import { createApp } from "../src/app.factory";
-import { createApiDocument } from "../src/shared/presentation/api-documentation";
+import { createApp } from "#src/app.factory";
+import { createApiDocument } from "#src/shared/presentation/api-documentation";
 
 const openApiDirectory = resolve(process.cwd(), "openapi");
 const openApiFile = resolve(openApiDirectory, "openapi.json");

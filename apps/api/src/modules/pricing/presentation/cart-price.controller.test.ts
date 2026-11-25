@@ -1,18 +1,18 @@
 import { levels } from "pino";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { REQUEST_BODY_LIMIT_BYTES } from "../../../app.factory";
-import { API_GLOBAL_PREFIX } from "../../../shared/presentation/api-routes";
+import { REQUEST_BODY_LIMIT_BYTES } from "#src/app.factory";
+import { EMPTY_CART_ERROR_CODE } from "#src/modules/pricing/domain/cart";
+import { CURRENCY } from "#src/modules/pricing/domain/euro-cents";
+import { API_GLOBAL_PREFIX } from "#src/shared/presentation/api-routes";
 import {
   internalProblem,
   PROBLEM_JSON_MEDIA_TYPE,
   requestProblems,
-} from "../../../shared/presentation/problem-details";
+} from "#src/shared/presentation/problem-details";
 import {
   createSystemUnderTest,
   type SystemUnderTest,
-} from "../../../test/create-system-under-test";
-import { EMPTY_CART_ERROR_CODE } from "../domain/cart";
-import { CURRENCY } from "../domain/euro-cents";
+} from "#src/test/create-system-under-test";
 import {
   LINE_TOO_LONG_ERROR_CODE,
   MAX_BASKET_LINE_LENGTH,

@@ -1,4 +1,4 @@
-import { failure, type Result, success } from "../../../shared/result";
+import { failure, type Result, success } from "#src/shared/result";
 import { type EuroCents, sumEuroCents } from "./euro-cents";
 import {
   MOVIE_KINDS,

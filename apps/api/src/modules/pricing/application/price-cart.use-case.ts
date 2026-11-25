@@ -1,8 +1,11 @@
-import { type Result, success } from "../../../shared/result";
-import { Cart, type EmptyCartError } from "../domain/cart";
-import { type PriceBreakdown, priceCart } from "../domain/cart-pricing";
-import type { DiscountTier } from "../domain/discount-tier";
-import { MovieTitle } from "../domain/movie-title";
+import { Cart, type EmptyCartError } from "#src/modules/pricing/domain/cart";
+import {
+  type PriceBreakdown,
+  priceCart,
+} from "#src/modules/pricing/domain/cart-pricing";
+import type { DiscountTier } from "#src/modules/pricing/domain/discount-tier";
+import { MovieTitle } from "#src/modules/pricing/domain/movie-title";
+import { type Result, success } from "#src/shared/result";
 import type { CatalogRepository } from "./catalog-repository";
 
 export type PriceCartError = EmptyCartError;

@@ -7,18 +7,18 @@ import { join } from "node:path";
 import { vi } from "vitest";
 import { z } from "zod";
 
-import { createApp } from "../app.factory";
-import type { AppConfig } from "../config/app.config";
-import { PriceCartUseCase } from "../modules/pricing/application/price-cart.use-case";
+import { createApp } from "#src/app.factory";
+import type { AppConfig } from "#src/config/app.config";
+import { PriceCartUseCase } from "#src/modules/pricing/application/price-cart.use-case";
 import {
   CART_CONTROLLER_PATH,
   CART_PRICE_PATH,
-} from "../modules/pricing/presentation/cart-routes";
+} from "#src/modules/pricing/presentation/cart-routes";
 import {
   API_GLOBAL_PREFIX,
   OPENAPI_JSON_PATH,
-} from "../shared/presentation/api-routes";
-import { REQUEST_ID_HEADER } from "../shared/presentation/request-id";
+} from "#src/shared/presentation/api-routes";
+import { REQUEST_ID_HEADER } from "#src/shared/presentation/request-id";
 
 type HttpReply = {
   readonly statusCode: number;

@@ -23,8 +23,12 @@ hexagonal split, and create only the layers they need:
   use case and map its result to a response.
 
 A dependency points inward only: `presentation` → `application` →
-`domain`. Import modules explicitly, with no barrel `index.ts`. A workspace
-package exposes its public API through `package.json#exports`.
+`domain`. Import modules explicitly, with no barrel `index.ts`. In the API,
+an import that climbs out of its directory goes through the `#src/*`
+alias (`#src/shared/result`), and an import of the same directory or
+below stays relative (`./cart`, `./pricing/pricing.module`); never write
+`../` (ADR 0017). A workspace package exposes its
+public API through `package.json#exports`.
 
 ## Types and errors
 

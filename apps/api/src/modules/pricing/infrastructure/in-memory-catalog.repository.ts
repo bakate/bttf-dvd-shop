@@ -1,7 +1,10 @@
-import type { CatalogRepository } from "../application/catalog-repository";
-import { euroCents } from "../domain/euro-cents";
-import { MOVIE_KINDS, type Movie } from "../domain/movie";
-import { type MovieTitle, titleMatchingKey } from "../domain/movie-title";
+import type { CatalogRepository } from "#src/modules/pricing/application/catalog-repository";
+import { euroCents } from "#src/modules/pricing/domain/euro-cents";
+import { MOVIE_KINDS, type Movie } from "#src/modules/pricing/domain/movie";
+import {
+  type MovieTitle,
+  titleMatchingKey,
+} from "#src/modules/pricing/domain/movie-title";
 
 const SAGA_EPISODE_PRICE = euroCents(1500);
 const REGULAR_MOVIE_PRICE = euroCents(2000);

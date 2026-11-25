@@ -6,11 +6,17 @@
   "files": [
     "dist"
   ],
+  "imports": {
+    "#src/*": {
+      "development": "./src/*.ts",
+      "default": "./dist/*.js"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist coverage .turbo .cache",
-    "dev": "tsx watch src/main.ts",
-    "generate:openapi": "tsx scripts/generate-openapi.ts",
+    "dev": "tsx watch --conditions=development src/main.ts",
+    "generate:openapi": "tsx --conditions=development scripts/generate-openapi.ts",
     "start": "node dist/main.js",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",

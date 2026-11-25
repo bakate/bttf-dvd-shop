@@ -1,6 +1,8 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  // Vite's defaults swap `development` for `production` under NODE_ENV=production, and `#src/*` would then load a stale `dist/`.
+  ssr: { resolve: { conditions: ["development"] } },
   test: {
     environment: "node",
     globals: true,

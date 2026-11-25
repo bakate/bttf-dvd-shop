@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   createSystemUnderTest,
   type SystemUnderTest,
-} from "../../test/create-system-under-test";
+} from "#src/test/create-system-under-test";
 import { API_DOCUMENTATION_PATH } from "./api-routes";
 
 const builtFrontendIndexHtml =
