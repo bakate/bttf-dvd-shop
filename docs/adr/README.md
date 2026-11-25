@@ -6,7 +6,7 @@ replacement.
 
 | #    | Decision                                                                                                     |
 | :--- | :----------------------------------------------------------------------------------------------------------- |
-| 0001 | [Bootstrap from the author's template, on Node 26 LTS](0001-template-and-stack.md)                           |
+| 0001 | [Bootstrap from the author's template and stack, on Node 26 LTS](0001-template-and-stack.md)                 |
 | 0002 | [One required quality gate on every pull request](0002-ci-quality-gate.md)                                   |
 | 0003 | [Theme tokens and messages, checked by one script](0003-ui-conventions.md)                                   |
 | 0004 | [Light mode only](0004-light-mode-only.md)                                                                   |
@@ -24,3 +24,4 @@ replacement.
 | 0016 | [One Zod schema per message is the pricing contract](0016-zod-schema-as-pricing-contract.md)                 |
 | 0017 | [API modules import each other through a `#src/*` subpath import](0017-src-alias-through-subpath-imports.md) |
 | 0018 | [End-to-end tests run against the built container](0018-end-to-end-test-against-the-container.md)            |
+| 0019 | [The frontend has no state machine and no gateway layer](0019-frontend-without-xstate.md)                    |
