@@ -2,7 +2,7 @@
 
 - Status: accepted
 - Date: 2026-11-24
-- Issue: #3 (parent #1)
+- Issue: #3, consolidated in #10 (parent #1)
 
 ## Context
 
@@ -17,4 +17,9 @@ The UI is French only, yet every text must change in one place and a second lang
 ## Consequences
 
 - A missing key is a compile error, and screen tests import their expected texts from the module.
-- A second language swaps the object for a library lookup at each call site: a mechanical change.
+- The API never sends French: it sends stable codes (ADR 0012), which the screen translates through the module. A second language needs no API change.
+- When a second language becomes a requirement, the migration is:
+  1. Add a library (`react-i18next` or `@formatjs/intl`) and turn `messages.ts` into the `fr` resource, keeping its shape. A parameterised function becomes an interpolated string.
+  2. Type the keys from that resource, so a missing key stays a compile error.
+  3. Replace each `messages.x.y` with the library's lookup. The call sites are the module's importers: the change is mechanical.
+  4. Build the `Intl` formatters from the active locale instead of `fr-FR`, set `lang` at runtime, and let screen tests read the `fr` resource.

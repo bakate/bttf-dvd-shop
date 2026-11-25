@@ -1,8 +1,8 @@
-# 1. Bootstrap from the author's template, on Node 26 LTS
+# 1. Bootstrap from the author's template and stack, on Node 26 LTS
 
 - Status: accepted
 - Date: 2026-11-24
-- Issue: #2 (parent #1)
+- Issue: #2, consolidated in #10 (parent #1)
 
 ## Context
 
@@ -14,6 +14,20 @@ Vercel deploy.
 
 ## Decision
 
+- Keep the template's stack, each piece for a present need:
+  - **Turborepo + pnpm workspaces**: the API, the frontend and the shared
+    tooling version together, and one command builds or tests them all.
+  - **NestJS**: modules and dependency injection give the hexagonal split
+    (ports, adapters) a home without hand-written wiring, and its Swagger
+    module generates the OpenAPI document the frontend types come from.
+  - **Zod**: one schema validates untrusted input and infers its type,
+    for the HTTP contract (ADR 0016) and the configuration.
+  - **React + Vite + Mantine**: a component library with an accessible
+    base and a theme that holds every style token (ADR 0003).
+  - **TanStack Query**: one mutation per price request, with its pending
+    and error state (ADR 0019).
+  - **Biome, Vitest, Husky, Commitlint**: one fast linter and formatter,
+    one test runner for both apps, and conventions checked on commit.
 - Start from the template and remove everything that was only there as an
   example: the todos feature (API and web), XState and the other
   dependencies only the sample used, the `ZodValidationPipe` (#6 replaces
