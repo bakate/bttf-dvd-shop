@@ -16,7 +16,10 @@ import {
 } from "@tabler/icons-react";
 import type { FormEvent } from "react";
 
-import { classifyRequestError } from "../../api-client";
+import {
+  classifyRequestError,
+  type RequestFailureKind,
+} from "../../api-client";
 import { formatPrice } from "../../format";
 import { messages } from "../../messages";
 import { notifyError } from "../../notify-error";
@@ -31,10 +34,22 @@ const BASKET_MAX_ROWS = 16;
 
 const { serviceNotResponding } = messages.cartPricing.errors;
 
+const screenHandlingByFailureKind = {
+  "client-problem": "notify-cart-problem",
+  timeout: "show-retry",
+  unexpected: "none", // the global MutationCache handler notifies it
+} as const satisfies Record<
+  RequestFailureKind,
+  "notify-cart-problem" | "show-retry" | "none"
+>;
+
 function notifyCartProblem(error: unknown): void {
   const failure = classifyRequestError(error);
 
-  if (failure.kind !== "client-problem") {
+  if (
+    screenHandlingByFailureKind[failure.kind] !== "notify-cart-problem" ||
+    !("problem" in failure)
+  ) {
     return;
   }
 
@@ -53,7 +68,9 @@ export function CartPricing({
 }) {
   const pricing = usePriceCart();
   const isServiceNotResponding =
-    pricing.isError && classifyRequestError(pricing.error).kind === "timeout";
+    pricing.isError &&
+    screenHandlingByFailureKind[classifyRequestError(pricing.error).kind] ===
+      "show-retry";
 
   function price(basketToPrice: string): void {
     pricing.mutate(basketToPrice, { onError: notifyCartProblem });
