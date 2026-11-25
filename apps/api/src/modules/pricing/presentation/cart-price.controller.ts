@@ -23,9 +23,11 @@ import {
   type PriceCartError,
   PriceCartUseCase,
 } from "../application/price-cart.use-case";
+import type { PriceBreakdown } from "../domain/cart-pricing";
 import { CURRENCY } from "../domain/euro-cents";
 import { splitBasketLines } from "./basket-lines";
 import {
+  apiKindByMovieKind,
   type CartPriceResponse,
   cartPriceRequestOpenApiSchema,
   cartPriceRequestSchema,
@@ -36,6 +38,24 @@ import { CART_CONTROLLER_PATH, CART_PRICE_PATH } from "./cart-routes";
 const apiErrorCodeByPriceCartError = {
   "cart/empty": "VALIDATION_FAILED",
 } as const satisfies Record<PriceCartError["code"], ApiErrorCode>;
+
+function toCartPriceResponse(breakdown: PriceBreakdown): CartPriceResponse {
+  return {
+    lines: breakdown.lines.map(({ movie, quantity }) => ({
+      title: movie.title.text,
+      kind: apiKindByMovieKind[movie.kind],
+      unitPrice: movie.unitPrice,
+      quantity,
+    })),
+    sagaSubtotal: breakdown.sagaSubtotal,
+    distinctSagaEpisodeCount: breakdown.distinctSagaEpisodeCount,
+    discountRate: breakdown.discountRate ?? null,
+    discount: breakdown.discount,
+    regularSubtotal: breakdown.regularSubtotal,
+    total: breakdown.total,
+    currency: CURRENCY,
+  };
+}
 
 @ApiTags("Cart")
 @Controller(CART_CONTROLLER_PATH)
@@ -73,6 +93,6 @@ export class CartPriceController {
       );
     }
 
-    return { total: result.value.total, currency: CURRENCY };
+    return toCartPriceResponse(result.value);
   }
 }
