@@ -20,3 +20,4 @@ replacement.
 | 0012 | [Invalid carts are RFC 9457 problem details](0012-invalid-carts-as-problem-details.md)               |
 | 0013 | [Crash-only process handling](0013-crash-only-process-handling.md)                                   |
 | 0014 | [The screen's safety net for unexpected failures](0014-frontend-error-safety-net.md)                 |
+| 0015 | [One container serves the API and the frontend](0015-single-container-deployment.md)                 |

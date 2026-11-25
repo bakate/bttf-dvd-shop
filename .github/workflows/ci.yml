@@ -53,5 +53,8 @@ jobs:
       - name: Check generated API contract
         run: pnpm check:api-contract
 
+      - name: Build Docker image
+        run: docker build --tag bttf-dvd-shop .
+
       - name: Audit dependencies
         run: pnpm audit

@@ -28,6 +28,7 @@
     "npm_lifecycle_event",
     "PORT",
     "CORS_ORIGIN",
+    "WEB_DIST_DIR",
     "API_RATE_LIMIT_TTL_MS",
     "API_RATE_LIMIT_LIMIT"
   ]

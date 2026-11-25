@@ -10,6 +10,7 @@ const appConfigSchema = z.object({
     .default("development"),
   PORT: z.coerce.number().int().positive().default(defaultPort),
   CORS_ORIGIN: z.string().trim().min(1).optional(),
+  WEB_DIST_DIR: z.string().trim().min(1).optional(),
   API_RATE_LIMIT_TTL_MS: z.coerce
     .number()
     .int()
