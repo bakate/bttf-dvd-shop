@@ -45,16 +45,16 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "basket"
-                ],
                 "properties": {
                   "basket": {
                     "type": "string",
                     "description": "The cart as plain text, one movie title per line.",
                     "example": "Back to the Future 1\nBack to the Future 2\nLa chèvre"
                   }
-                }
+                },
+                "required": [
+                  "basket"
+                ]
               }
             }
           }
@@ -66,28 +66,11 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "lines",
-                    "sagaSubtotal",
-                    "distinctSagaEpisodeCount",
-                    "discountRate",
-                    "discount",
-                    "regularSubtotal",
-                    "total",
-                    "currency"
-                  ],
                   "properties": {
                     "lines": {
                       "type": "array",
-                      "description": "One line per title, in the order each title first appears in the basket.",
                       "items": {
                         "type": "object",
-                        "required": [
-                          "title",
-                          "kind",
-                          "unitPrice",
-                          "quantity"
-                        ],
                         "properties": {
                           "title": {
                             "type": "string",
@@ -104,53 +87,67 @@
                           "unitPrice": {
                             "type": "integer",
                             "minimum": 0,
+                            "maximum": 9007199254740991,
                             "description": "Unit price of the movie, in euro cents.",
                             "example": 1500
                           },
                           "quantity": {
                             "type": "integer",
                             "minimum": 1,
+                            "maximum": 9007199254740991,
                             "description": "Copies of the title in the cart, matched ignoring case and whitespace.",
                             "example": 2
                           }
-                        }
-                      }
+                        },
+                        "required": [
+                          "title",
+                          "kind",
+                          "unitPrice",
+                          "quantity"
+                        ]
+                      },
+                      "description": "One line per title, in the order each title first appears in the basket."
                     },
                     "sagaSubtotal": {
                       "type": "integer",
                       "minimum": 0,
+                      "maximum": 9007199254740991,
                       "description": "Saga episodes before discount, in euro cents.",
                       "example": 3000
                     },
                     "distinctSagaEpisodeCount": {
                       "type": "integer",
                       "minimum": 0,
+                      "maximum": 9007199254740991,
                       "description": "Number of different saga episodes in the cart.",
                       "example": 2
                     },
                     "discountRate": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 1,
                       "nullable": true,
                       "description": "Rate of the discount tier applied to the saga subtotal, or null when the cart reaches no tier.",
-                      "example": 0.1
+                      "example": 0.1,
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
                     },
                     "discount": {
                       "type": "integer",
                       "minimum": 0,
+                      "maximum": 9007199254740991,
                       "description": "Discount taken off the saga subtotal, in euro cents.",
                       "example": 300
                     },
                     "regularSubtotal": {
                       "type": "integer",
                       "minimum": 0,
+                      "maximum": 9007199254740991,
                       "description": "Regular movies, never discounted, in euro cents.",
                       "example": 2000
                     },
                     "total": {
                       "type": "integer",
                       "minimum": 0,
+                      "maximum": 9007199254740991,
                       "description": "Total price of the cart, in euro cents.",
                       "example": 4700
                     },
@@ -160,7 +157,17 @@
                         "EUR"
                       ]
                     }
-                  }
+                  },
+                  "required": [
+                    "lines",
+                    "sagaSubtotal",
+                    "distinctSagaEpisodeCount",
+                    "discountRate",
+                    "discount",
+                    "regularSubtotal",
+                    "total",
+                    "currency"
+                  ]
                 }
               }
             }

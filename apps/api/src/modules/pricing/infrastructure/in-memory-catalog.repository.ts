@@ -1,6 +1,6 @@
 import type { CatalogRepository } from "../application/catalog-repository";
 import { euroCents } from "../domain/euro-cents";
-import type { Movie } from "../domain/movie";
+import { MOVIE_KINDS, type Movie } from "../domain/movie";
 import { type MovieTitle, titleMatchingKey } from "../domain/movie-title";
 
 const SAGA_EPISODE_PRICE = euroCents(1500);
@@ -21,14 +21,14 @@ export class InMemoryCatalogRepository implements CatalogRepository {
 
     if (episodeNumber === undefined) {
       return {
-        kind: "regular-movie",
+        kind: MOVIE_KINDS.regularMovie,
         title,
         unitPrice: REGULAR_MOVIE_PRICE,
       };
     }
 
     return {
-      kind: "saga-episode",
+      kind: MOVIE_KINDS.sagaEpisode,
       title,
       episodeNumber,
       unitPrice: SAGA_EPISODE_PRICE,

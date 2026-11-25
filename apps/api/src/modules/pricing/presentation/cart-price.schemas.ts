@@ -1,50 +1,15 @@
 import type { SchemaObject } from "@nestjs/swagger";
 import { z } from "zod";
 
-import type { DiscountRate } from "../domain/discount-tier";
-import { CURRENCY, type EuroCents } from "../domain/euro-cents";
-import type { Movie } from "../domain/movie";
+import { CURRENCY } from "../domain/euro-cents";
+import { MOVIE_KINDS } from "../domain/movie";
 
 export const cartPriceRequestSchema = z.object({
-  basket: z.string(),
+  basket: z.string().meta({
+    description: "The cart as plain text, one movie title per line.",
+    example: "Back to the Future 1\nBack to the Future 2\nLa chèvre",
+  }),
 });
-
-export const apiKindByMovieKind = {
-  "saga-episode": "saga-episode",
-  "regular-movie": "regular-movie",
-} as const satisfies Record<Movie["kind"], string>;
-
-type ApiMovieKind = (typeof apiKindByMovieKind)[Movie["kind"]];
-
-export type CartPriceLine = {
-  readonly title: string;
-  readonly kind: ApiMovieKind;
-  readonly unitPrice: EuroCents;
-  readonly quantity: number;
-};
-
-export type CartPriceResponse = {
-  readonly lines: readonly CartPriceLine[];
-  readonly sagaSubtotal: EuroCents;
-  readonly distinctSagaEpisodeCount: number;
-  readonly discountRate: DiscountRate | null;
-  readonly discount: EuroCents;
-  readonly regularSubtotal: EuroCents;
-  readonly total: EuroCents;
-  readonly currency: typeof CURRENCY;
-};
-
-export const cartPriceRequestOpenApiSchema = {
-  type: "object",
-  required: ["basket"],
-  properties: {
-    basket: {
-      type: "string",
-      description: "The cart as plain text, one movie title per line.",
-      example: "Back to the Future 1\nBack to the Future 2\nLa chèvre",
-    },
-  },
-} as const satisfies SchemaObject;
 
 function amountInCents({
   description,
@@ -53,90 +18,79 @@ function amountInCents({
   readonly description: string;
   readonly example: number;
 }) {
-  return {
-    type: "integer",
-    minimum: 0,
-    description: `${description}, in euro cents.`,
-    example,
-  } as const satisfies SchemaObject;
+  return z
+    .int()
+    .nonnegative()
+    .meta({
+      description: `${description}, in euro cents.`,
+      example,
+    });
 }
 
-export const cartPriceResponseOpenApiSchema = {
-  type: "object",
-  required: [
-    "lines",
-    "sagaSubtotal",
-    "distinctSagaEpisodeCount",
-    "discountRate",
-    "discount",
-    "regularSubtotal",
-    "total",
-    "currency",
-  ],
-  properties: {
-    lines: {
-      type: "array",
-      description:
-        "One line per title, in the order each title first appears in the basket.",
-      items: {
-        type: "object",
-        required: ["title", "kind", "unitPrice", "quantity"],
-        properties: {
-          title: {
-            type: "string",
-            description:
-              "The title as first read, with its whitespace collapsed.",
-            example: "Back to the Future 1",
-          },
-          kind: {
-            type: "string",
-            enum: Object.values(apiKindByMovieKind),
-          },
-          unitPrice: amountInCents({
-            description: "Unit price of the movie",
-            example: 1500,
-          }),
-          quantity: {
-            type: "integer",
-            minimum: 1,
-            description:
-              "Copies of the title in the cart, matched ignoring case and whitespace.",
-            example: 2,
-          },
-        },
-      },
-    },
-    sagaSubtotal: amountInCents({
-      description: "Saga episodes before discount",
-      example: 3000,
-    }),
-    distinctSagaEpisodeCount: {
-      type: "integer",
-      minimum: 0,
-      description: "Number of different saga episodes in the cart.",
-      example: 2,
-    },
-    discountRate: {
-      type: "number",
-      minimum: 0,
-      maximum: 1,
-      nullable: true,
-      description:
-        "Rate of the discount tier applied to the saga subtotal, or null when the cart reaches no tier.",
-      example: 0.1,
-    },
-    discount: amountInCents({
-      description: "Discount taken off the saga subtotal",
-      example: 300,
-    }),
-    regularSubtotal: amountInCents({
-      description: "Regular movies, never discounted",
-      example: 2000,
-    }),
-    total: amountInCents({
-      description: "Total price of the cart",
-      example: 4700,
-    }),
-    currency: { type: "string", enum: [CURRENCY] },
-  },
-} as const satisfies SchemaObject;
+const cartPriceLineSchema = z.object({
+  title: z.string().meta({
+    description: "The title as first read, with its whitespace collapsed.",
+    example: "Back to the Future 1",
+  }),
+  kind: z.enum(MOVIE_KINDS),
+  unitPrice: amountInCents({
+    description: "Unit price of the movie",
+    example: 1500,
+  }),
+  quantity: z.int().min(1).meta({
+    description:
+      "Copies of the title in the cart, matched ignoring case and whitespace.",
+    example: 2,
+  }),
+});
+
+export const cartPriceResponseSchema = z.object({
+  lines: z.array(cartPriceLineSchema).meta({
+    description:
+      "One line per title, in the order each title first appears in the basket.",
+  }),
+  sagaSubtotal: amountInCents({
+    description: "Saga episodes before discount",
+    example: 3000,
+  }),
+  distinctSagaEpisodeCount: z.int().nonnegative().meta({
+    description: "Number of different saga episodes in the cart.",
+    example: 2,
+  }),
+  discountRate: z.number().min(0).max(1).nullable().meta({
+    description:
+      "Rate of the discount tier applied to the saga subtotal, or null when the cart reaches no tier.",
+    example: 0.1,
+  }),
+  discount: amountInCents({
+    description: "Discount taken off the saga subtotal",
+    example: 300,
+  }),
+  regularSubtotal: amountInCents({
+    description: "Regular movies, never discounted",
+    example: 2000,
+  }),
+  total: amountInCents({
+    description: "Total price of the cart",
+    example: 4700,
+  }),
+  currency: z.literal(CURRENCY),
+});
+
+export type CartPriceResponse = z.infer<typeof cartPriceResponseSchema>;
+
+// @nestjs/swagger types OpenAPI 3.0 more narrowly than Zod's JSON Schema; the openapi-3.0 target emits a document it accepts (ADR 0016).
+function toOpenApiSchema(schema: z.ZodType): SchemaObject {
+  return z.toJSONSchema(schema, {
+    target: "openapi-3.0",
+    io: "input",
+  }) as SchemaObject;
+}
+
+export const cartPriceRequestOpenApiSchema = toOpenApiSchema(
+  cartPriceRequestSchema,
+);
+
+export const cartPriceResponseOpenApiSchema = toOpenApiSchema(
+  cartPriceResponseSchema,
+);

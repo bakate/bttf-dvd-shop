@@ -21,3 +21,4 @@ replacement.
 | 0013 | [Crash-only process handling](0013-crash-only-process-handling.md)                                   |
 | 0014 | [The screen's safety net for unexpected failures](0014-frontend-error-safety-net.md)                 |
 | 0015 | [One container serves the API and the frontend](0015-single-container-deployment.md)                 |
+| 0016 | [One Zod schema per message is the pricing contract](0016-zod-schema-as-pricing-contract.md)         |

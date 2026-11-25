@@ -1,6 +1,11 @@
 import { failure, type Result, success } from "../../../shared/result";
 import { type EuroCents, sumEuroCents } from "./euro-cents";
-import type { Movie, RegularMovie, SagaEpisode } from "./movie";
+import {
+  MOVIE_KINDS,
+  type Movie,
+  type RegularMovie,
+  type SagaEpisode,
+} from "./movie";
 
 export const EMPTY_CART_ERROR_CODE = "cart/empty";
 
@@ -10,11 +15,11 @@ export type EmptyCartError = {
 };
 
 function isSagaEpisode(movie: Movie): movie is SagaEpisode {
-  return movie.kind === "saga-episode";
+  return movie.kind === MOVIE_KINDS.sagaEpisode;
 }
 
 function isRegularMovie(movie: Movie): movie is RegularMovie {
-  return movie.kind === "regular-movie";
+  return movie.kind === MOVIE_KINDS.regularMovie;
 }
 
 export type CartLine = {

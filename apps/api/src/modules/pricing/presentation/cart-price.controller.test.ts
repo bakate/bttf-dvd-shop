@@ -227,6 +227,40 @@ describe("POST /api/cart/price", () => {
       problemReply({ status: 413, type: requestProblems.tooLarge.type }),
     );
   });
+  it("Given the API documentation, when a client reads the cart price response, then amounts are non-negative integer cents, quantity is at least 1 and the discount rate is a nullable rate", async () => {
+    const response = await api.readCartPriceResponseDocumentation();
+
+    const amountInCents = {
+      type: "integer",
+      minimum: 0,
+      description: expect.stringContaining("in euro cents"),
+      example: expect.any(Number),
+    };
+    expect(response).toMatchObject({
+      properties: {
+        lines: {
+          items: {
+            properties: {
+              kind: { enum: ["saga-episode", "regular-movie"] },
+              unitPrice: amountInCents,
+              quantity: { type: "integer", minimum: 1 },
+            },
+          },
+        },
+        sagaSubtotal: amountInCents,
+        discountRate: {
+          type: "number",
+          minimum: 0,
+          maximum: 1,
+          nullable: true,
+        },
+        discount: amountInCents,
+        regularSubtotal: amountInCents,
+        total: amountInCents,
+        currency: { enum: [CURRENCY] },
+      },
+    });
+  });
 });
 
 describe("POST /api/cart/price when pricing fails unexpectedly", () => {

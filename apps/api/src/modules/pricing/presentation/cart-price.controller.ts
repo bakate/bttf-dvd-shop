@@ -29,7 +29,6 @@ import type { PriceBreakdown } from "../domain/cart-pricing";
 import { CURRENCY } from "../domain/euro-cents";
 import { type BasketError, readBasketLines } from "./basket-lines";
 import {
-  apiKindByMovieKind,
   type CartPriceResponse,
   cartPriceRequestOpenApiSchema,
   cartPriceRequestSchema,
@@ -63,7 +62,7 @@ function toCartPriceResponse(breakdown: PriceBreakdown): CartPriceResponse {
   return {
     lines: breakdown.lines.map(({ movie, quantity }) => ({
       title: movie.title.text,
-      kind: apiKindByMovieKind[movie.kind],
+      kind: movie.kind,
       unitPrice: movie.unitPrice,
       quantity,
     })),
