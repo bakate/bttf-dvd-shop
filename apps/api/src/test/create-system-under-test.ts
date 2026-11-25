@@ -1,5 +1,9 @@
 import "reflect-metadata";
 
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
 import { vi } from "vitest";
 
 import { createApp } from "../app.factory";
@@ -25,6 +29,10 @@ type TracedReply = ContentReply & {
   readonly requestId: string | null;
 };
 
+type PageReply = ContentReply & {
+  readonly contentSecurityPolicy: Readonly<Record<string, string>>;
+};
+
 type CrossOriginReply = {
   readonly allowedOrigin: string | null;
 };
@@ -47,19 +55,32 @@ export type SystemUnderTest = {
   givenPricingFailsWith(error: unknown): void;
   logs(): string;
   loggedRecords(): readonly unknown[];
+  openPage(path: string): Promise<PageReply>;
   close(): Promise<void>;
 };
 
 export async function createSystemUnderTest({
   environment = {},
+  builtFrontendIndexHtml,
 }: {
   readonly environment?: EnvironmentVariables;
+  readonly builtFrontendIndexHtml?: string;
 } = {}): Promise<SystemUnderTest> {
-  const restoreEnvironment = applyEnvironment(environment);
+  const builtFrontendDirectory =
+    builtFrontendIndexHtml === undefined
+      ? undefined
+      : await writeBuiltFrontend(builtFrontendIndexHtml);
+  const restoreEnvironment = applyEnvironment({
+    ...environment,
+    ...(builtFrontendDirectory === undefined
+      ? {}
+      : { WEB_DIST_DIR: builtFrontendDirectory }),
+  });
   const firstLogLine = logLines.length;
   const app = await createApp({ logDestination });
   await app.listen(0);
-  const apiUrl = `${await app.getUrl()}/${API_GLOBAL_PREFIX}`;
+  const appUrl = await app.getUrl();
+  const apiUrl = `${appUrl}/${API_GLOBAL_PREFIX}`;
 
   async function get(path: string): Promise<HttpReply> {
     const response = await fetch(`${apiUrl}${path}`);
@@ -113,11 +134,43 @@ export async function createSystemUnderTest({
     },
     logs: () => appLogLines().join(""),
     loggedRecords: () => appLogLines().map((line): unknown => JSON.parse(line)),
+    openPage: async (path) => {
+      const response = await fetch(`${appUrl}${path}`);
+
+      return {
+        statusCode: response.status,
+        mediaType: response.headers.get("content-type")?.split(";")[0],
+        contentSecurityPolicy: directivesOf(
+          response.headers.get("content-security-policy") ?? "",
+        ),
+        body: await response.text(),
+      };
+    },
     close: async () => {
       await app.close();
       restoreEnvironment();
+
+      if (builtFrontendDirectory !== undefined) {
+        await rm(builtFrontendDirectory, { recursive: true });
+      }
     },
   };
+}
+
+function directivesOf(policy: string): Readonly<Record<string, string>> {
+  return Object.fromEntries(
+    policy
+      .split(";")
+      .map((directive) => directive.trim().split(/\s+/))
+      .map(([name = "", ...sources]) => [name, sources.join(" ")]),
+  );
+}
+
+async function writeBuiltFrontend(indexHtml: string): Promise<string> {
+  const directory = await mkdtemp(join(tmpdir(), "bttf-web-"));
+  await writeFile(join(directory, "index.html"), indexHtml);
+
+  return directory;
 }
 
 function applyEnvironment(environment: EnvironmentVariables): () => void {

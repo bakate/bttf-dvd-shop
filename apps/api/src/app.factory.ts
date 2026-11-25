@@ -9,6 +9,7 @@ import type { AppConfig } from "./config/app.config";
 import { appModule } from "./modules/app.module";
 import { setupApiDocumentation } from "./shared/presentation/api-documentation";
 import { API_GLOBAL_PREFIX } from "./shared/presentation/api-routes";
+import { webAppContentSecurityPolicy } from "./shared/presentation/content-security-policy";
 
 export type TypedConfigService = ConfigService<AppConfig, true>;
 
@@ -28,13 +29,26 @@ export async function createApp({
 
   app.useBodyParser("json", { limit: REQUEST_BODY_LIMIT_BYTES });
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        useDefaults: false,
+        directives: webAppContentSecurityPolicy,
+      },
+    }),
+  );
   app.setGlobalPrefix(API_GLOBAL_PREFIX);
   app.enableShutdownHooks();
   setupApiDocumentation({
     app,
     isProduction: config.get("NODE_ENV", { infer: true }) === "production",
   });
+
+  const webDistDirectory = config.get("WEB_DIST_DIR", { infer: true });
+
+  if (webDistDirectory !== undefined) {
+    app.useStaticAssets(webDistDirectory);
+  }
 
   const allowedOrigin = config.get("CORS_ORIGIN", { infer: true });
 

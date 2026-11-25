@@ -4,6 +4,10 @@ Application web de calcul du prix d'un panier de DVD, avec la promotion
 _Retour vers le futur_. Le cahier des charges complet est dans l'issue
 [#1](https://github.com/bakate/bttf-dvd-shop/issues/1).
 
+**Démo** : <https://bttf-dvd-shop.onrender.com>. Le service gratuit de
+Render s'endort après une période d'inactivité : la première requête peut
+prendre **environ 30 s**, le temps que le conteneur redémarre.
+
 Le projet part du template Turborepo de l'auteur
 ([bakate/turborepo-template](https://github.com/bakate/turborepo-template)),
 débarrassé de son code d'exemple.
@@ -45,6 +49,19 @@ URLs locales :
 
 Le serveur Vite redirige `/api` vers `http://localhost:3000`, le frontend
 appelle donc l'API par des URLs relatives.
+
+## Avec Docker
+
+Sans Node installé, avec Docker uniquement :
+
+```sh
+docker compose up --build
+```
+
+L'application (frontend et API) répond sur `http://localhost:3000`, l'API
+sur `http://localhost:3000/api`. Le conteneur tourne en utilisateur non
+root, Docker vérifie sa santé sur `/api/health` et Compose le redémarre
+s'il s'arrête.
 
 ## Scripts
 
@@ -91,6 +108,7 @@ Variables d'environnement, validées au démarrage :
 | `NODE_ENV`              | `development` | `development`, `test` ou `production`      |
 | `PORT`                  | `3000`        | Port HTTP de l'API                         |
 | `CORS_ORIGIN`           | absent        | Origine autorisée en CORS                  |
+| `WEB_DIST_DIR`          | absent        | Dossier du frontend compilé à servir       |
 | `API_RATE_LIMIT_TTL_MS` | `60000`       | Fenêtre du rate limiting, en millisecondes |
 | `API_RATE_LIMIT_LIMIT`  | `100`         | Nombre maximum de requêtes par fenêtre     |
 
