@@ -4,6 +4,7 @@ import {
   type ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from "@nestjs/common";
 import { z } from "zod";
 
@@ -36,9 +37,15 @@ type ClientError = {
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(HttpExceptionFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<HttpResponse>();
     const problem = toProblemDetails(exception);
+
+    if (problem.status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+      this.logger.error(exception);
+    }
 
     response.status(problem.status).type(PROBLEM_JSON_MEDIA_TYPE).json(problem);
   }

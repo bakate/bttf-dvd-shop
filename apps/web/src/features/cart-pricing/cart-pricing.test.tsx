@@ -6,6 +6,7 @@ import { createSystemUnderTest } from "../../test/create-system-under-test";
 import { EXAMPLE_BASKETS } from "./example-baskets";
 
 const { breakdown, errors } = messages.cartPricing;
+const { serviceNotResponding } = errors;
 const emptyCart = "cart/empty" satisfies keyof typeof errors.byProblemType;
 
 describe("Cart pricing screen", () => {
@@ -152,5 +153,87 @@ describe("Cart pricing screen", () => {
     expect(await shop.announcedError()).toContain(
       errors.byProblemType[emptyCart],
     );
+  });
+
+  it.each([
+    {
+      failure: "fails with a server error",
+      given: "givenTheApiFailsWithAServerError",
+    },
+    { failure: "is unreachable", given: "givenTheApiIsUnreachable" },
+  ] as const)(
+    "Given the API $failure, when the clerk calculates, then an unexpected error notification is announced",
+    async ({ given }) => {
+      const shop = createSystemUnderTest();
+      shop[given]();
+
+      await shop.priceBasket("Back to the Future 1");
+
+      expect(await shop.announcedError()).toContain(
+        messages.errors.unexpected.message,
+      );
+    },
+  );
+
+  it("Given the API rejects the cart, when the clerk calculates, then only the cart's own message is announced, with no unexpected error notification", async () => {
+    const shop = createSystemUnderTest();
+    shop.givenTheApiRejectsTheCartWith(emptyCart);
+
+    await shop.calculate();
+
+    expect(await shop.announcedErrors()).toEqual([
+      expect.stringContaining(errors.byProblemType[emptyCart]),
+    ]);
+  });
+
+  it("Given the API stays silent past the request timeout, when the clerk calculates, then only the service not responding message is announced", async () => {
+    const shop = createSystemUnderTest();
+    shop.givenTheApiStaysSilentPastTheTimeout();
+    await shop.priceBasket("Back to the Future 1");
+
+    await shop.waitOutTheRequestTimeout();
+
+    expect(await shop.announcedErrors()).toEqual([
+      expect.stringContaining(serviceNotResponding.message),
+    ]);
+    expect(shop.isCalculateBusy()).toBe(false);
+  });
+
+  it("Given the service did not respond and has now started, when the clerk retries, then the same basket is priced and its total announced", async () => {
+    const shop = createSystemUnderTest();
+    shop.givenTheApiStaysSilentPastTheTimeout();
+    await shop.priceBasket("Back to the Future 1");
+    await shop.waitOutTheRequestTimeout();
+    shop.givenTheApiPricesCartsAt(1500);
+
+    await shop.retry();
+
+    expect(await shop.announcedResult()).toContain("15,00 €");
+    expect(shop.pricedBaskets()).toEqual([
+      "Back to the Future 1",
+      "Back to the Future 1",
+    ]);
+  });
+
+  it("Given the API answers a price the screen cannot show, when the clerk calculates, then the fallback screen replaces the blank page", async () => {
+    const shop = createSystemUnderTest();
+    shop.givenTheApiAnswersAPriceTheScreenCannotShow();
+
+    await shop.priceBasket("Back to the Future 1");
+
+    expect(await shop.shownFallbackScreen()).toContain(
+      messages.errors.fallbackScreen.message,
+    );
+  });
+
+  it("Given the fallback screen is shown, when the clerk resets it, then the cart form is back with the basket typed before", async () => {
+    const shop = createSystemUnderTest();
+    shop.givenTheApiAnswersAPriceTheScreenCannotShow();
+    await shop.priceBasket("Back to the Future 1");
+    await shop.shownFallbackScreen();
+
+    await shop.resetFallbackScreen();
+
+    expect(shop.basket()).toBe("Back to the Future 1");
   });
 });

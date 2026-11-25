@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import { App } from "./app";
 import { applyDocumentMetadata } from "./document-metadata";
+import { reportError } from "./report-error";
 
 const rootElement = document.getElementById("app");
 
@@ -12,7 +13,16 @@ if (rootElement === null) {
 
 applyDocumentMetadata(document);
 
-createRoot(rootElement).render(
+window.addEventListener("error", (event) => reportError(event.error));
+window.addEventListener("unhandledrejection", (event) =>
+  reportError(event.reason),
+);
+
+createRoot(rootElement, {
+  onCaughtError: reportError,
+  onUncaughtError: reportError,
+  onRecoverableError: reportError,
+}).render(
   <StrictMode>
     <App />
   </StrictMode>,

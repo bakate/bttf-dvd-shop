@@ -7,5 +7,12 @@ export default defineConfig({
     // Workaround: the bundled client does not compile under exactOptionalPropertyTypes.
     header: ({ defaultValue }) => [...defaultValue, "// @ts-nocheck"],
   },
-  plugins: ["@hey-api/client-fetch", "@hey-api/typescript", "@hey-api/sdk"],
+  plugins: [
+    {
+      name: "@hey-api/client-fetch",
+      runtimeConfigPath: "../../apps/web/src/api-client.ts",
+    },
+    "@hey-api/typescript",
+    "@hey-api/sdk",
+  ],
 });
