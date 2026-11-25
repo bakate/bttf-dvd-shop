@@ -71,6 +71,8 @@ export const theme = createTheme({
 // Tabler icons take their size as a prop, outside Mantine's spacing scale.
 export const iconSizes = { sm: "0.875rem", md: "1.125rem" } as const;
 
+export const textMaxWidths = { cell: "16rem" } as const;
+
 const applicationVariables = {
   // WCAG 1.4.10 (reflow): the layout must hold at a 320 CSS px wide viewport.
   "--mantine-body-min-width": "20rem",

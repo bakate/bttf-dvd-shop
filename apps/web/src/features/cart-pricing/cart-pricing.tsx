@@ -97,6 +97,7 @@ export function CartPricing({
                   type="button"
                   variant="default"
                   size="xs"
+                  disabled={pricing.isPending}
                   leftSection={
                     <IconClipboardList size={iconSizes.sm} aria-hidden />
                   }

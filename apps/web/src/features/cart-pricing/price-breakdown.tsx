@@ -11,7 +11,7 @@ import type { ReactNode } from "react";
 import { formatDeduction, formatPrice, formatRate } from "../../format";
 import type { CartPriceControllerPriceResponse } from "../../generated/api";
 import { messages } from "../../messages";
-import { iconSizes } from "../../theme/theme";
+import { iconSizes, textMaxWidths } from "../../theme/theme";
 
 const { breakdown: labels } = messages.cartPricing;
 const SUMMARY_LABEL_COLUMNS = 3;
@@ -91,13 +91,16 @@ export function PriceBreakdown({
       <Table.Tbody>
         {price.lines.map((line) => (
           <Table.Tr key={line.title}>
-            {/* A cell only clips its text when its max width is 0 and it takes the remaining width. */}
-            <Table.Td w="100%" maw={0}>
+            {/* On a phone, a cell only clips its text when its max width is 0 and it takes the remaining width. */}
+            <Table.Td
+              w={{ base: "100%", sm: "auto" }}
+              maw={{ base: 0, sm: textMaxWidths.cell }}
+            >
               <Text truncate="end" fz="inherit" title={line.title}>
                 {line.title}
               </Text>
             </Table.Td>
-            <Table.Td>
+            <Table.Td miw={{ sm: "max-content" }}>
               <KindBadge kind={line.kind} />
             </Table.Td>
             <Table.Td ta="right">{line.quantity}</Table.Td>
