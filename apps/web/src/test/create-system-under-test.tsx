@@ -77,8 +77,9 @@ export function createSystemUnderTest() {
       answerPricing(async () => threeEpisodesAndARegularMovie),
     givenTheApiPricesOneEpisodeTwice: () =>
       answerPricing(async () => oneEpisodeTwice),
-    givenTheApiPricesCartsAt: (total: number) =>
-      answerPricing(async () => regularMoviesPricedAt(total)),
+    givenTheApiPricesTwoDistinctEpisodesOneOfThemTwice: () =>
+      answerPricing(async () => twoDistinctEpisodesOneOfThemTwice),
+    givenTheApiPricesOneEpisode: () => answerPricing(async () => oneEpisode),
     givenTheApiNeverAnswers: () => answerPricing(() => NEVER),
     givenTheApiStaysSilentPastTheTimeout: () => {
       vi.useFakeTimers({ shouldAdvanceTime: true });
@@ -250,20 +251,47 @@ const oneEpisodeTwice: CartPriceControllerPriceResponse = {
   currency: "EUR",
 };
 
-function regularMoviesPricedAt(
-  total: number,
-): CartPriceControllerPriceResponse {
-  return {
-    lines: [],
-    sagaSubtotal: 0,
-    distinctSagaEpisodeCount: 0,
-    discountRate: null,
-    discount: 0,
-    regularSubtotal: total,
-    total,
-    currency: "EUR",
-  };
-}
+const twoDistinctEpisodesOneOfThemTwice: CartPriceControllerPriceResponse = {
+  lines: [
+    {
+      title: "Back to the Future 1",
+      kind: "saga-episode",
+      unitPrice: 1500,
+      quantity: 2,
+    },
+    {
+      title: "Back to the Future 2",
+      kind: "saga-episode",
+      unitPrice: 1500,
+      quantity: 1,
+    },
+  ],
+  sagaSubtotal: 4500,
+  distinctSagaEpisodeCount: 2,
+  discountRate: 0.1,
+  discount: 450,
+  regularSubtotal: 0,
+  total: 4050,
+  currency: "EUR",
+};
+
+const oneEpisode: CartPriceControllerPriceResponse = {
+  lines: [
+    {
+      title: "Back to the Future 1",
+      kind: "saga-episode",
+      unitPrice: 1500,
+      quantity: 1,
+    },
+  ],
+  sagaSubtotal: 1500,
+  distinctSagaEpisodeCount: 1,
+  discountRate: null,
+  discount: 0,
+  regularSubtotal: 0,
+  total: 1500,
+  currency: "EUR",
+};
 
 function exampleButton(exampleNumber: number): HTMLElement {
   return screen.getByRole("button", {

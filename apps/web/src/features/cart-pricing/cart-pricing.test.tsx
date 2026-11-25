@@ -12,7 +12,7 @@ const emptyCart = "cart/empty" satisfies keyof typeof errors.byProblemType;
 describe("Cart pricing screen", () => {
   it("Given the API prices the basket, when the clerk calculates it, then the total is announced in French euros", async () => {
     const shop = createSystemUnderTest();
-    shop.givenTheApiPricesCartsAt(4050);
+    shop.givenTheApiPricesTwoDistinctEpisodesOneOfThemTwice();
 
     await shop.priceBasket(
       "Back to the Future 1\nBack to the Future 1\nBack to the Future 2",
@@ -24,7 +24,7 @@ describe("Cart pricing screen", () => {
 
   it("Given a basket with blank lines and extra spaces, when the clerk calculates it, then the API receives the basket exactly as typed", async () => {
     const shop = createSystemUnderTest();
-    shop.givenTheApiPricesCartsAt(3500);
+    shop.givenTheApiPricesThreeEpisodesAndARegularMovie();
     const basket = "  Back to the Future 3\n\nLa chèvre  ";
 
     await shop.priceBasket(basket);
@@ -47,11 +47,11 @@ describe("Cart pricing screen", () => {
 
   it("Given a keyboard user, when they type the basket and press Enter on Calculate, then the total is announced", async () => {
     const shop = createSystemUnderTest();
-    shop.givenTheApiPricesCartsAt(2000);
+    shop.givenTheApiPricesOneEpisode();
 
-    await shop.priceBasketWithKeyboard("La chèvre");
+    await shop.priceBasketWithKeyboard("Back to the Future 1");
 
-    expect(await shop.announcedResult()).toContain("20,00 €");
+    expect(await shop.announcedResult()).toContain("15,00 €");
   });
 
   it("Given the API prices three distinct episodes and a regular movie, when the clerk calculates, then the breakdown table shows every line and how the total is built", async () => {
@@ -214,7 +214,7 @@ describe("Cart pricing screen", () => {
     shop.givenTheApiStaysSilentPastTheTimeout();
     await shop.priceBasket("Back to the Future 1");
     await shop.waitOutTheRequestTimeout();
-    shop.givenTheApiPricesCartsAt(1500);
+    shop.givenTheApiPricesOneEpisode();
 
     await shop.retry();
 
