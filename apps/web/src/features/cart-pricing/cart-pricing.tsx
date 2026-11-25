@@ -1,15 +1,25 @@
-import { Box, Button, Group, Stack, Text, Textarea } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import {
-  IconAlertTriangle,
+  Alert,
+  Box,
+  Button,
+  Group,
+  Stack,
+  Text,
+  Textarea,
+} from "@mantine/core";
+import {
   IconCalculator,
   IconClipboardList,
+  IconClockExclamation,
   IconReceiptEuro,
+  IconRefresh,
 } from "@tabler/icons-react";
-import { type FormEvent, useState } from "react";
+import type { FormEvent } from "react";
 
+import { classifyRequestError } from "../../api-client";
 import { formatPrice } from "../../format";
 import { messages } from "../../messages";
+import { notifyError } from "../../notify-error";
 import { iconSizes } from "../../theme/theme";
 import { cartErrorMessage } from "./cart-error-message";
 import { EXAMPLE_BASKETS } from "./example-baskets";
@@ -19,22 +29,39 @@ import { usePriceCart } from "./use-price-cart";
 const BASKET_MIN_ROWS = 8;
 const BASKET_MAX_ROWS = 16;
 
-function notifyPricingError(error: unknown): void {
-  notifications.show({
-    color: "danger",
-    icon: <IconAlertTriangle size={iconSizes.md} aria-hidden />,
+const { serviceNotResponding } = messages.cartPricing.errors;
+
+function notifyCartProblem(error: unknown): void {
+  const failure = classifyRequestError(error);
+
+  if (failure.kind !== "client-problem") {
+    return;
+  }
+
+  notifyError({
     title: messages.cartPricing.errors.title,
-    message: cartErrorMessage(error),
+    message: cartErrorMessage(failure.problem),
   });
 }
 
-export function CartPricing() {
-  const [basket, setBasket] = useState("");
+export function CartPricing({
+  basket,
+  onBasketChange,
+}: {
+  readonly basket: string;
+  readonly onBasketChange: (basket: string) => void;
+}) {
   const pricing = usePriceCart();
+  const isServiceNotResponding =
+    pricing.isError && classifyRequestError(pricing.error).kind === "timeout";
+
+  function price(basketToPrice: string): void {
+    pricing.mutate(basketToPrice, { onError: notifyCartProblem });
+  }
 
   function calculate(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
-    pricing.mutate(basket, { onError: notifyPricingError });
+    price(basket);
   }
 
   return (
@@ -45,7 +72,7 @@ export function CartPricing() {
             label={messages.cartPricing.basketLabel}
             description={messages.cartPricing.basketDescription}
             value={basket}
-            onChange={(event) => setBasket(event.currentTarget.value)}
+            onChange={(event) => onBasketChange(event.currentTarget.value)}
             autosize
             minRows={BASKET_MIN_ROWS}
             maxRows={BASKET_MAX_ROWS}
@@ -73,7 +100,7 @@ export function CartPricing() {
                   leftSection={
                     <IconClipboardList size={iconSizes.sm} aria-hidden />
                   }
-                  onClick={() => setBasket(exampleBasket)}
+                  onClick={() => onBasketChange(exampleBasket)}
                 >
                   {messages.cartPricing.examples.load(index + 1)}
                 </Button>
@@ -82,8 +109,26 @@ export function CartPricing() {
           </Group>
         </Stack>
       </form>
+      {isServiceNotResponding ? (
+        <Alert
+          color="caution"
+          icon={<IconClockExclamation size={iconSizes.md} aria-hidden />}
+          title={serviceNotResponding.title}
+        >
+          <Stack gap="sm" align="flex-start">
+            <Text>{serviceNotResponding.message}</Text>
+            <Button
+              variant="default"
+              leftSection={<IconRefresh size={iconSizes.md} aria-hidden />}
+              onClick={() => price(pricing.variables)}
+            >
+              {serviceNotResponding.retry}
+            </Button>
+          </Stack>
+        </Alert>
+      ) : null}
       <Box role="status">
-        {pricing.data !== undefined && (
+        {pricing.data === undefined ? null : (
           <Stack gap="lg">
             <Stack gap="xs">
               <Group gap="xs" c="dimmed">

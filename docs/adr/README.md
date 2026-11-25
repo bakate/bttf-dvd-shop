@@ -18,3 +18,5 @@ replacement.
 | 0010 | [The price breakdown, in the API and on screen](0010-price-breakdown.md)                             |
 | 0011 | [Tabler icons, decorative only](0011-tabler-icons.md)                                                |
 | 0012 | [Invalid carts are RFC 9457 problem details](0012-invalid-carts-as-problem-details.md)               |
+| 0013 | [Crash-only process handling](0013-crash-only-process-handling.md)                                   |
+| 0014 | [The screen's safety net for unexpected failures](0014-frontend-error-safety-net.md)                 |

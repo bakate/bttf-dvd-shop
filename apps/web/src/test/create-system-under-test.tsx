@@ -9,8 +9,9 @@ import {
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http, type PathParams } from "msw";
 import { setupServer } from "msw/node";
-import { afterAll, afterEach, beforeAll, expect } from "vitest";
+import { afterAll, afterEach, beforeAll, expect, vi } from "vitest";
 
+import { REQUEST_TIMEOUT_MS } from "../api-client";
 import { App } from "../app";
 import type {
   CartPriceControllerPriceData,
@@ -32,6 +33,7 @@ beforeAll(() => {
 afterEach(() => {
   server.resetHandlers();
   notifications.clean();
+  vi.useRealTimers();
 });
 
 afterAll(() => {
@@ -40,7 +42,13 @@ afterAll(() => {
 
 export function createSystemUnderTest() {
   const pricedBaskets: string[] = [];
-  const user = userEvent.setup();
+  const user = userEvent.setup({
+    advanceTimers: (delay) => {
+      if (vi.isFakeTimers()) {
+        vi.advanceTimersByTime(delay);
+      }
+    },
+  });
 
   function answerPricing(
     answer: () => Promise<CartPriceControllerPriceResponse>,
@@ -72,6 +80,28 @@ export function createSystemUnderTest() {
     givenTheApiPricesCartsAt: (total: number) =>
       answerPricing(async () => regularMoviesPricedAt(total)),
     givenTheApiNeverAnswers: () => answerPricing(() => NEVER),
+    givenTheApiStaysSilentPastTheTimeout: () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      answerPricing(() => NEVER);
+    },
+    givenTheApiFailsWithAServerError: () =>
+      server.use(
+        http.post(cartPriceUrl, () =>
+          HttpResponse.json(
+            {
+              type: "server/internal",
+              title: "Internal server error.",
+              status: 500,
+              detail: "An unexpected error occurred.",
+            },
+            { status: 500, headers: { "Content-Type": PROBLEM_JSON } },
+          ),
+        ),
+      ),
+    givenTheApiIsUnreachable: () =>
+      server.use(http.post(cartPriceUrl, () => HttpResponse.error())),
+    givenTheApiAnswersAPriceTheScreenCannotShow: () =>
+      server.use(http.post(cartPriceUrl, () => HttpResponse.json({}))),
     givenTheApiRejectsTheCartWith: (type: string) =>
       server.use(
         http.post(cartPriceUrl, () =>
@@ -90,6 +120,31 @@ export function createSystemUnderTest() {
       await typeBasket(basket);
       await user.click(calculateButton());
     },
+    waitOutTheRequestTimeout: async () => {
+      await vi.advanceTimersByTimeAsync(REQUEST_TIMEOUT_MS);
+    },
+    retry: async () => {
+      await user.click(
+        await screen.findByRole("button", {
+          name: messages.cartPricing.errors.serviceNotResponding.retry,
+        }),
+      );
+    },
+    resetFallbackScreen: async () => {
+      await user.click(
+        await screen.findByRole("button", {
+          name: messages.errors.fallbackScreen.reset,
+        }),
+      );
+    },
+    shownFallbackScreen: async () =>
+      normalizeText(
+        (
+          await screen.findByRole("heading", {
+            name: messages.errors.fallbackScreen.title,
+          })
+        ).closest("main")?.textContent ?? "",
+      ),
     loadExample: async (exampleNumber: number) => {
       await user.click(exampleButton(exampleNumber));
     },
@@ -112,6 +167,10 @@ export function createSystemUnderTest() {
       await user.tab();
       await user.keyboard("{Enter}");
     },
+    announcedErrors: async () =>
+      (await screen.findAllByRole("alert")).map((alert) =>
+        normalizeText(alert.textContent ?? ""),
+      ),
     announcedError: async () =>
       normalizeText((await screen.findByRole("alert")).textContent ?? ""),
     isCalculateBusy: () =>

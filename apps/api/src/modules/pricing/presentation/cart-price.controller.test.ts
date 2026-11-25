@@ -1,6 +1,9 @@
+import { levels } from "pino";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { REQUEST_BODY_LIMIT_BYTES } from "../../../app.factory";
+import { API_GLOBAL_PREFIX } from "../../../shared/presentation/api-routes";
 import {
+  internalProblem,
   PROBLEM_JSON_MEDIA_TYPE,
   requestProblems,
 } from "../../../shared/presentation/problem-details";
@@ -16,6 +19,7 @@ import {
   MAX_BASKET_LINES,
   TOO_MANY_LINES_ERROR_CODE,
 } from "./basket-lines";
+import { CART_CONTROLLER_PATH, CART_PRICE_PATH } from "./cart-routes";
 
 describe("POST /api/cart/price", () => {
   let api: SystemUnderTest;
@@ -222,6 +226,72 @@ describe("POST /api/cart/price", () => {
     expect(reply).toEqual(
       problemReply({ status: 413, type: requestProblems.tooLarge.type }),
     );
+  });
+});
+
+describe("POST /api/cart/price when pricing fails unexpectedly", () => {
+  const secret = "catalogue password is hunter2";
+  let api: SystemUnderTest;
+
+  beforeAll(async () => {
+    api = await createSystemUnderTest();
+    api.givenPricingFailsWith(new Error(secret));
+  });
+
+  afterAll(async () => {
+    await api.close();
+  });
+
+  it("Given pricing throws an unexpected error, when a basket is priced, then the API answers a generic internal problem that reveals nothing of the error", async () => {
+    const reply = await api.priceCart({ basket: "Back to the Future 1" });
+
+    expect(reply).toMatchObject(
+      problemReply({ status: 500, type: internalProblem.type }),
+    );
+    expect(JSON.stringify(reply.body)).not.toContain(secret);
+  });
+
+  it("Given pricing throws an unexpected error, when a basket is priced, then the logs hold its stack under the request id the response carries", async () => {
+    const reply = await api.priceCartTraced({ basket: "Back to the Future 1" });
+
+    expect(api.loggedRecords()).toContainEqual(
+      expect.objectContaining({
+        level: levels.values.error,
+        req: expect.objectContaining({ id: reply.requestId }),
+        err: expect.objectContaining({
+          stack: expect.stringContaining(secret),
+        }),
+      }),
+    );
+  });
+});
+
+describe("POST /api/cart/price logs", () => {
+  let api: SystemUnderTest;
+
+  beforeAll(async () => {
+    api = await createSystemUnderTest();
+  });
+
+  afterAll(async () => {
+    await api.close();
+  });
+
+  it("Given a basket, when it is priced, then the logs record the request as JSON under its request id, without headers or the basket", async () => {
+    const reply = await api.priceCartTraced({ basket: "Mon voisin Totoro" });
+
+    expect(reply.requestId).toEqual(expect.any(String));
+    expect(api.loggedRecords()).toContainEqual(
+      expect.objectContaining({
+        req: {
+          id: reply.requestId,
+          method: "POST",
+          url: `/${API_GLOBAL_PREFIX}/${CART_CONTROLLER_PATH}/${CART_PRICE_PATH}`,
+        },
+        res: { statusCode: 200 },
+      }),
+    );
+    expect(api.logs()).not.toContain("Totoro");
   });
 });
 

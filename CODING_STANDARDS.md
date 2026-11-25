@@ -159,6 +159,17 @@ comments).
 - Every style value comes from the theme. A missing token is added to the
   theme, never inlined.
 - Every control works with the keyboard and shows a visible focus ring.
+- Conditional rendering is a ternary with an explicit `null` branch, never
+  `&&`. A falsy `0` or `""` on the left of `&&` renders as text, and the
+  ternary states both outcomes.
+
+```tsx
+{
+  pricing.data === undefined ? null : <PriceBreakdown price={pricing.data} />;
+}
+
+// Not: {pricing.data !== undefined && <PriceBreakdown price={pricing.data} />}
+```
 
 `pnpm check:ui-conventions` enforces the first two rules in CI and on
 commit (ADR 0003).

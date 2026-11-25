@@ -12,12 +12,14 @@ import { useState } from "react";
 import { CartPricing } from "./features/cart-pricing/cart-pricing";
 import { messages } from "./messages";
 import { createQueryClient } from "./query-client";
+import { RootErrorBoundary } from "./root-error-boundary";
 import { cssVariablesResolver, theme } from "./theme/theme";
 
 const mainContentId = "main-content";
 
 export function App() {
   const [queryClient] = useState(createQueryClient);
+  const [basket, setBasket] = useState("");
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -27,21 +29,23 @@ export function App() {
         forceColorScheme="light"
       >
         <Notifications />
-        <Anchor href={`#${mainContentId}`} className="skip-link">
-          {messages.skipLink}
-        </Anchor>
-        <Container component="header" size="md" pt="xl">
-          <Title order={1}>{messages.app.title}</Title>
-        </Container>
-        <Container
-          component="main"
-          id={mainContentId}
-          tabIndex={-1}
-          size="md"
-          py="xl"
-        >
-          <CartPricing />
-        </Container>
+        <RootErrorBoundary>
+          <Anchor href={`#${mainContentId}`} className="skip-link">
+            {messages.skipLink}
+          </Anchor>
+          <Container component="header" size="md" pt="xl">
+            <Title order={1}>{messages.app.title}</Title>
+          </Container>
+          <Container
+            component="main"
+            id={mainContentId}
+            tabIndex={-1}
+            size="md"
+            py="xl"
+          >
+            <CartPricing basket={basket} onBasketChange={setBasket} />
+          </Container>
+        </RootErrorBoundary>
       </MantineProvider>
     </QueryClientProvider>
   );

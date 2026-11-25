@@ -21,6 +21,19 @@ export const messages = {
     title: "Boutique DVD Retour vers le futur",
   },
   skipLink: "Aller au contenu principal",
+  errors: {
+    unexpected: {
+      title: "Erreur inattendue",
+      message:
+        "Le service a rencontré un problème. Réessayez dans quelques instants.",
+    },
+    fallbackScreen: {
+      title: "L'application a rencontré un problème",
+      message:
+        "Cet écran n'a pas pu s'afficher. Relancez le calcul : si le problème persiste, rechargez la page.",
+      reset: "Revenir au calcul",
+    },
+  },
   cartPricing: {
     basketLabel: "Panier",
     basketDescription: "Un titre de film par ligne.",
@@ -39,6 +52,12 @@ export const messages = {
           "Le panier est trop volumineux. Retirez des titres, puis recalculez.",
       } satisfies Record<CartProblemType, string>,
       fallback: "Le prix du panier n'a pas pu être calculé. Réessayez.",
+      serviceNotResponding: {
+        title: "Le service ne répond pas",
+        message:
+          "Le service met du temps à répondre : il est peut-être en train de démarrer. Patientez quelques secondes, puis réessayez.",
+        retry: "Réessayer",
+      },
     },
     examples: {
       label: "Exemples du sujet",

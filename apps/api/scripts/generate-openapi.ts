@@ -10,7 +10,7 @@ const openApiDirectory = resolve(process.cwd(), "openapi");
 const openApiFile = resolve(openApiDirectory, "openapi.json");
 
 async function generateOpenApiSchema(): Promise<void> {
-  const app = await createApp({ logger: false });
+  const app = await createApp({ logDestination: { write: () => {} } });
 
   try {
     const document = createApiDocument({ app });
