@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "build": "tsc && vite build",
-    "clean": "rm -rf dist coverage .turbo .cache",
+    "clean": "rm -rf dist coverage test-results playwright-report .turbo .cache",
     "dev": "vite",
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage --passWithNoTests",
+    "test:e2e": "playwright test",
     "test:watch": "vitest --watch",
     "typecheck": "tsc --noEmit"
   },
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
+    "@playwright/test": "1.65.1",
     "@testing-library/dom": "10.4.2",
     "@testing-library/react": "16.3.3",
     "@testing-library/user-event": "14.6.13",

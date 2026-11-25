@@ -56,5 +56,25 @@ jobs:
       - name: Build Docker image
         run: docker build --tag bttf-dvd-shop .
 
+      - name: Start container
+        run: |
+          docker run --detach --name bttf-dvd-shop --publish 3000:3000 --health-interval 2s bttf-dvd-shop
+          timeout 60 sh -c 'until [ "$(docker inspect --format "{{.State.Health.Status}}" bttf-dvd-shop)" = healthy ]; do sleep 1; done' \
+            || { docker logs bttf-dvd-shop; exit 1; }
+
+      - name: Install Playwright browser
+        run: pnpm --filter web exec playwright install --with-deps chromium
+
+      - name: End-to-end test
+        run: pnpm test:e2e
+
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-traces
+          path: apps/web/test-results
+          if-no-files-found: ignore
+
       - name: Audit dependencies
         run: pnpm audit

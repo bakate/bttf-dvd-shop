@@ -63,6 +63,14 @@ sur `http://localhost:3000/api`. Le conteneur tourne en utilisateur non
 root, Docker vérifie sa santé sur `/api/health` et Compose le redémarre
 s'il s'arrête.
 
+Le test de bout en bout (Playwright) vise ce conteneur :
+
+```sh
+pnpm --filter web exec playwright install chromium
+docker compose up --build --wait
+pnpm test:e2e
+```
+
 ## Scripts
 
 | Commande                  | Rôle                                                        |
@@ -72,6 +80,7 @@ s'il s'arrête.
 | `pnpm typecheck`          | Vérifie les types de tous les workspaces                    |
 | `pnpm test`               | Lance les tests Vitest et ceux de `scripts/`                |
 | `pnpm test:coverage`      | Lance les tests avec la couverture                          |
+| `pnpm test:e2e`           | Lance le test Playwright contre le conteneur démarré        |
 | `pnpm check`              | Lint et format Biome sur tout le dépôt (sans écriture)      |
 | `pnpm format`             | Formate tout le dépôt avec Biome                            |
 | `pnpm generate:api`       | Régénère le document OpenAPI et les types du frontend       |
