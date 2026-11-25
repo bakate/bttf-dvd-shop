@@ -1,5 +1,9 @@
-import type { Cart } from "./cart";
-import { type DiscountTier, findApplicableTier } from "./discount-tier";
+import type { Cart, CartLine } from "./cart";
+import {
+  type DiscountRate,
+  type DiscountTier,
+  findApplicableTier,
+} from "./discount-tier";
 import {
   type EuroCents,
   euroCents,
@@ -9,7 +13,10 @@ import {
 } from "./euro-cents";
 
 export type PriceBreakdown = {
+  readonly lines: readonly CartLine[];
   readonly sagaSubtotal: EuroCents;
+  readonly distinctSagaEpisodeCount: number;
+  readonly discountRate: DiscountRate | undefined;
   readonly discount: EuroCents;
   readonly regularSubtotal: EuroCents;
   readonly total: EuroCents;
@@ -26,17 +33,18 @@ export function priceCart({
 }): PriceBreakdown {
   const sagaSubtotal = cart.sagaSubtotal();
   const regularSubtotal = cart.regularSubtotal();
-  const tier = findApplicableTier({
-    discountTiers,
-    distinctSagaEpisodeCount: cart.distinctSagaEpisodeCount(),
-  });
+  const distinctSagaEpisodeCount = cart.distinctSagaEpisodeCount();
+  const tier = findApplicableTier({ discountTiers, distinctSagaEpisodeCount });
   const discount =
     tier === undefined
       ? NO_DISCOUNT
       : shareOfEuroCents({ amount: sagaSubtotal, rate: tier.rate });
 
   return {
+    lines: cart.lines(),
     sagaSubtotal,
+    distinctSagaEpisodeCount,
+    discountRate: tier?.rate,
     discount,
     regularSubtotal,
     total: sumEuroCents([

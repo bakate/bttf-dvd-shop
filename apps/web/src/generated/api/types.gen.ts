@@ -48,6 +48,44 @@ export type CartPriceControllerPriceResponses = {
      */
     200: {
         /**
+         * One line per title, in the order each title first appears in the basket.
+         */
+        lines: Array<{
+            /**
+             * The title as first read, with its whitespace collapsed.
+             */
+            title: string;
+            kind: 'saga-episode' | 'regular-movie';
+            /**
+             * Unit price of the movie, in euro cents.
+             */
+            unitPrice: number;
+            /**
+             * Copies of the title in the cart, matched ignoring case and whitespace.
+             */
+            quantity: number;
+        }>;
+        /**
+         * Saga episodes before discount, in euro cents.
+         */
+        sagaSubtotal: number;
+        /**
+         * Number of different saga episodes in the cart.
+         */
+        distinctSagaEpisodeCount: number;
+        /**
+         * Rate of the discount tier applied to the saga subtotal, or null when the cart reaches no tier.
+         */
+        discountRate: number | null;
+        /**
+         * Discount taken off the saga subtotal, in euro cents.
+         */
+        discount: number;
+        /**
+         * Regular movies, never discounted, in euro cents.
+         */
+        regularSubtotal: number;
+        /**
          * Total price of the cart, in euro cents.
          */
         total: number;

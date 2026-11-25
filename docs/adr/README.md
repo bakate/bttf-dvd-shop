@@ -15,3 +15,5 @@ replacement.
 | 0007 | [Amounts are integer euro cents, in one currency](0007-integer-cents-single-currency.md)             |
 | 0008 | [How a basket is read and which titles are saga episodes](0008-input-reading-and-saga-membership.md) |
 | 0009 | [Discount tiers are data](0009-discount-tiers-as-data.md)                                            |
+| 0010 | [The price breakdown, in the API and on screen](0010-price-breakdown.md)                             |
+| 0011 | [Tabler icons, decorative only](0011-tabler-icons.md)                                                |
