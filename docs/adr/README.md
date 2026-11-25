@@ -23,3 +23,4 @@ replacement.
 | 0015 | [One container serves the API and the frontend](0015-single-container-deployment.md)                         |
 | 0016 | [One Zod schema per message is the pricing contract](0016-zod-schema-as-pricing-contract.md)                 |
 | 0017 | [API modules import each other through a `#src/*` subpath import](0017-src-alias-through-subpath-imports.md) |
+| 0018 | [End-to-end tests run against the built container](0018-end-to-end-test-against-the-container.md)            |
