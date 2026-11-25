@@ -1,4 +1,4 @@
-import { Badge, type BadgeVariant, Group, Table } from "@mantine/core";
+import { Badge, type BadgeVariant, Group, Table, Text } from "@mantine/core";
 import {
   IconBolt,
   IconDiscount,
@@ -91,7 +91,12 @@ export function PriceBreakdown({
       <Table.Tbody>
         {price.lines.map((line) => (
           <Table.Tr key={line.title}>
-            <Table.Td>{line.title}</Table.Td>
+            {/* A cell only clips its text when its max width is 0 and it takes the remaining width. */}
+            <Table.Td w="100%" maw={0}>
+              <Text truncate="end" fz="inherit" title={line.title}>
+                {line.title}
+              </Text>
+            </Table.Td>
             <Table.Td>
               <KindBadge kind={line.kind} />
             </Table.Td>

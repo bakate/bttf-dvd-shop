@@ -1,5 +1,7 @@
 import { Box, Button, Group, Stack, Text, Textarea } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import {
+  IconAlertTriangle,
   IconCalculator,
   IconClipboardList,
   IconReceiptEuro,
@@ -9,11 +11,22 @@ import { type FormEvent, useState } from "react";
 import { formatPrice } from "../../format";
 import { messages } from "../../messages";
 import { iconSizes } from "../../theme/theme";
+import { cartErrorMessage } from "./cart-error-message";
 import { EXAMPLE_BASKETS } from "./example-baskets";
 import { PriceBreakdown } from "./price-breakdown";
 import { usePriceCart } from "./use-price-cart";
 
-const BASKET_ROWS = 8;
+const BASKET_MIN_ROWS = 8;
+const BASKET_MAX_ROWS = 16;
+
+function notifyPricingError(error: unknown): void {
+  notifications.show({
+    color: "danger",
+    icon: <IconAlertTriangle size={iconSizes.md} aria-hidden />,
+    title: messages.cartPricing.errors.title,
+    message: cartErrorMessage(error),
+  });
+}
 
 export function CartPricing() {
   const [basket, setBasket] = useState("");
@@ -21,7 +34,7 @@ export function CartPricing() {
 
   function calculate(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
-    pricing.mutate(basket);
+    pricing.mutate(basket, { onError: notifyPricingError });
   }
 
   return (
@@ -33,7 +46,9 @@ export function CartPricing() {
             description={messages.cartPricing.basketDescription}
             value={basket}
             onChange={(event) => setBasket(event.currentTarget.value)}
-            rows={BASKET_ROWS}
+            autosize
+            minRows={BASKET_MIN_ROWS}
+            maxRows={BASKET_MAX_ROWS}
           />
           <Group justify="space-between">
             <Button

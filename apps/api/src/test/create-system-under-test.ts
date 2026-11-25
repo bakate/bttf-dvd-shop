@@ -13,6 +13,10 @@ type HttpReply = {
   readonly body: unknown;
 };
 
+type ContentReply = HttpReply & {
+  readonly mediaType: string | undefined;
+};
+
 type CrossOriginReply = {
   readonly allowedOrigin: string | null;
 };
@@ -22,7 +26,7 @@ type EnvironmentVariables = Partial<Record<keyof AppConfig, string>>;
 export type SystemUnderTest = {
   checkHealth(): Promise<HttpReply>;
   checkHealthFromOrigin(origin: string): Promise<CrossOriginReply>;
-  priceCart(body: unknown): Promise<HttpReply>;
+  priceCart(body: unknown): Promise<ContentReply>;
   close(): Promise<void>;
 };
 
@@ -63,7 +67,11 @@ export async function createSystemUnderTest({
         },
       );
 
-      return { statusCode: response.status, body: await response.json() };
+      return {
+        statusCode: response.status,
+        mediaType: response.headers.get("content-type")?.split(";")[0],
+        body: await response.json(),
+      };
     },
     close: async () => {
       await app.close();

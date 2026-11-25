@@ -2,4 +2,4 @@
 // @ts-nocheck
 
 export { cartPriceControllerPrice, healthControllerCheck, type Options } from './sdk.gen';
-export type { CartPriceControllerPriceData, CartPriceControllerPriceErrors, CartPriceControllerPriceResponse, CartPriceControllerPriceResponses, ClientOptions, HealthControllerCheckData, HealthControllerCheckResponse, HealthControllerCheckResponses } from './types.gen';
+export type { CartPriceControllerPriceData, CartPriceControllerPriceError, CartPriceControllerPriceErrors, CartPriceControllerPriceResponse, CartPriceControllerPriceResponses, ClientOptions, HealthControllerCheckData, HealthControllerCheckResponse, HealthControllerCheckResponses } from './types.gen';
