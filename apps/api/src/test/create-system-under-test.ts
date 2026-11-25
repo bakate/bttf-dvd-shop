@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { vi } from "vitest";
+import { z } from "zod";
 
 import { createApp } from "../app.factory";
 import type { AppConfig } from "../config/app.config";
@@ -13,7 +14,10 @@ import {
   CART_CONTROLLER_PATH,
   CART_PRICE_PATH,
 } from "../modules/pricing/presentation/cart-routes";
-import { API_GLOBAL_PREFIX } from "../shared/presentation/api-routes";
+import {
+  API_GLOBAL_PREFIX,
+  OPENAPI_JSON_PATH,
+} from "../shared/presentation/api-routes";
 import { REQUEST_ID_HEADER } from "../shared/presentation/request-id";
 
 type HttpReply = {
@@ -45,6 +49,24 @@ const logDestination = {
   },
 };
 
+const CART_PRICE_ROUTE = `/${API_GLOBAL_PREFIX}/${CART_CONTROLLER_PATH}/${CART_PRICE_PATH}`;
+
+const cartPriceDocumentationSchema = z.object({
+  paths: z.object({
+    [CART_PRICE_ROUTE]: z.object({
+      post: z.object({
+        responses: z.object({
+          "200": z.object({
+            content: z.object({
+              "application/json": z.object({ schema: z.unknown() }),
+            }),
+          }),
+        }),
+      }),
+    }),
+  }),
+});
+
 type EnvironmentVariables = Partial<Record<keyof AppConfig, string>>;
 
 export type SystemUnderTest = {
@@ -52,6 +74,7 @@ export type SystemUnderTest = {
   checkHealthFromOrigin(origin: string): Promise<CrossOriginReply>;
   priceCart(body: unknown): Promise<ContentReply>;
   priceCartTraced(body: unknown): Promise<TracedReply>;
+  readCartPriceResponseDocumentation(): Promise<unknown>;
   givenPricingFailsWith(error: unknown): void;
   logs(): string;
   loggedRecords(): readonly unknown[];
@@ -93,14 +116,11 @@ export async function createSystemUnderTest({
   }
 
   async function postCart(body: unknown): Promise<TracedReply> {
-    const response = await fetch(
-      `${apiUrl}/${CART_CONTROLLER_PATH}/${CART_PRICE_PATH}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      },
-    );
+    const response = await fetch(`${appUrl}${CART_PRICE_ROUTE}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
 
     return {
       statusCode: response.status,
@@ -127,6 +147,16 @@ export async function createSystemUnderTest({
       return reply;
     },
     priceCartTraced: postCart,
+    readCartPriceResponseDocumentation: async () => {
+      const response = await fetch(`${appUrl}${OPENAPI_JSON_PATH}`);
+      const document = cartPriceDocumentationSchema.parse(
+        await response.json(),
+      );
+
+      return document.paths[CART_PRICE_ROUTE].post.responses["200"].content[
+        "application/json"
+      ].schema;
+    },
     givenPricingFailsWith: (error) => {
       vi.spyOn(app.get(PriceCartUseCase), "execute").mockImplementation(() => {
         throw error;
