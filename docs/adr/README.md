@@ -17,3 +17,4 @@ replacement.
 | 0009 | [Discount tiers are data](0009-discount-tiers-as-data.md)                                            |
 | 0010 | [The price breakdown, in the API and on screen](0010-price-breakdown.md)                             |
 | 0011 | [Tabler icons, decorative only](0011-tabler-icons.md)                                                |
+| 0012 | [Invalid carts are RFC 9457 problem details](0012-invalid-carts-as-problem-details.md)               |

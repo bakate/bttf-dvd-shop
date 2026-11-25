@@ -1,9 +1,11 @@
 import "@fontsource-variable/inter";
 import "@fontsource-variable/space-grotesk";
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 import "./global.css";
 
 import { Anchor, Container, MantineProvider, Title } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -24,6 +26,7 @@ export function App() {
         cssVariablesResolver={cssVariablesResolver}
         forceColorScheme="light"
       >
+        <Notifications />
         <Anchor href={`#${mainContentId}`} className="skip-link">
           {messages.skipLink}
         </Anchor>

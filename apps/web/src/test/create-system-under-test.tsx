@@ -1,3 +1,4 @@
+import { notifications } from "@mantine/notifications";
 import {
   getDefaultNormalizer,
   render,
@@ -19,6 +20,7 @@ import { messages } from "../messages";
 
 const cartPriceUrl: CartPriceControllerPriceData["url"] = "/api/cart/price";
 const NEVER = new Promise<never>(() => {});
+const PROBLEM_JSON = "application/problem+json";
 
 const server = setupServer();
 const normalizeText = getDefaultNormalizer();
@@ -29,6 +31,7 @@ beforeAll(() => {
 
 afterEach(() => {
   server.resetHandlers();
+  notifications.clean();
 });
 
 afterAll(() => {
@@ -55,6 +58,10 @@ export function createSystemUnderTest() {
     );
   }
 
+  async function typeBasket(basket: string): Promise<void> {
+    await user.type(basketField(), basket);
+  }
+
   render(<App />);
 
   return {
@@ -65,9 +72,22 @@ export function createSystemUnderTest() {
     givenTheApiPricesCartsAt: (total: number) =>
       answerPricing(async () => regularMoviesPricedAt(total)),
     givenTheApiNeverAnswers: () => answerPricing(() => NEVER),
+    givenTheApiRejectsTheCartWith: (type: string) =>
+      server.use(
+        http.post(cartPriceUrl, () =>
+          HttpResponse.json(
+            { type, title: "Rejected.", status: 400, detail: "Rejected." },
+            { status: 400, headers: { "Content-Type": PROBLEM_JSON } },
+          ),
+        ),
+      ),
     pricedBaskets: () => pricedBaskets,
+    typeBasket,
+    calculate: async () => {
+      await user.click(calculateButton());
+    },
     priceBasket: async (basket: string) => {
-      await user.type(basketField(), basket);
+      await typeBasket(basket);
       await user.click(calculateButton());
     },
     loadExample: async (exampleNumber: number) => {
@@ -92,6 +112,8 @@ export function createSystemUnderTest() {
       await user.tab();
       await user.keyboard("{Enter}");
     },
+    announcedError: async () =>
+      normalizeText((await screen.findByRole("alert")).textContent ?? ""),
     isCalculateBusy: () =>
       calculateButton().getAttribute("aria-busy") === "true",
     announcedResult: async () => {

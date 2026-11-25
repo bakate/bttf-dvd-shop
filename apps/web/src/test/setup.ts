@@ -16,3 +16,9 @@ window.matchMedia = (query: string): MediaQueryList => ({
   removeEventListener: () => {},
   dispatchEvent: () => false,
 });
+
+// jsdom has no FontFaceSet, which Mantine's autosize textarea listens to.
+Object.defineProperty(document, "fonts", {
+  value: new EventTarget(),
+  configurable: true,
+});

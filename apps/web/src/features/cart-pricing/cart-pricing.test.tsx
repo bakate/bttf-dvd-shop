@@ -5,7 +5,8 @@ import { messages } from "../../messages";
 import { createSystemUnderTest } from "../../test/create-system-under-test";
 import { EXAMPLE_BASKETS } from "./example-baskets";
 
-const { breakdown } = messages.cartPricing;
+const { breakdown, errors } = messages.cartPricing;
+const emptyCart = "cart/empty" satisfies keyof typeof errors.byProblemType;
 
 describe("Cart pricing screen", () => {
   it("Given the API prices the basket, when the clerk calculates it, then the total is announced in French euros", async () => {
@@ -114,5 +115,42 @@ describe("Cart pricing screen", () => {
     await shop.loadExampleWithKeyboard(2);
 
     expect(shop.basket()).toBe(EXAMPLE_BASKETS[1]);
+  });
+
+  it.each(
+    Object.entries(errors.byProblemType).map(([type, message]) => ({
+      type,
+      message,
+    })),
+  )(
+    "Given the API rejects the cart with $type, when the clerk calculates, then its French message is announced in a notification",
+    async ({ type, message }) => {
+      const shop = createSystemUnderTest();
+      shop.givenTheApiRejectsTheCartWith(type);
+
+      await shop.priceBasket("Back to the Future 1");
+
+      expect(await shop.announcedError()).toContain(message);
+    },
+  );
+
+  it("Given the API rejects the cart with a code the screen does not know, when the clerk calculates, then the generic message is announced", async () => {
+    const shop = createSystemUnderTest();
+    shop.givenTheApiRejectsTheCartWith("cart/unknown");
+
+    await shop.priceBasket("Back to the Future 1");
+
+    expect(await shop.announcedError()).toContain(errors.fallback);
+  });
+
+  it("Given an empty basket field, when the clerk calculates, then the API's empty cart message is announced", async () => {
+    const shop = createSystemUnderTest();
+    shop.givenTheApiRejectsTheCartWith(emptyCart);
+
+    await shop.calculate();
+
+    expect(await shop.announcedError()).toContain(
+      errors.byProblemType[emptyCart],
+    );
   });
 });

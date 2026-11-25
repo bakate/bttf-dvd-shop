@@ -13,7 +13,7 @@ to the recruiter "unless you say otherwise" (#1).
 ## Decision
 
 - **Line splitting** (`\n`, `\r\n`, `\r`) is an input format concern. It
-  lives in the HTTP adapter (`splitBasketLines`), so a JSON or CSV input
+  lives in the HTTP adapter (`readBasketLines`), so a JSON or CSV input
   would only change the adapter.
 - **Normalisation** is a domain rule owned by `MovieTitle`: leading,
   trailing and repeated whitespace collapse to one space, and titles match

@@ -1,6 +1,6 @@
-import type { INestApplication } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
+import type { NestExpressApplication } from "@nestjs/platform-express";
 import helmet from "helmet";
 
 import type { AppConfig } from "./config/app.config";
@@ -10,15 +10,20 @@ import { API_GLOBAL_PREFIX } from "./shared/presentation/api-routes";
 
 export type TypedConfigService = ConfigService<AppConfig, true>;
 
+export const REQUEST_BODY_LIMIT_BYTES = 16 * 1024;
+
 export async function createApp({
   logger,
 }: {
   readonly logger: boolean;
-}): Promise<INestApplication> {
-  const app = await NestFactory.create(AppModule, {
+}): Promise<NestExpressApplication> {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false,
     ...(logger ? {} : { logger: false }),
   });
   const config = app.get<TypedConfigService>(ConfigService);
+
+  app.useBodyParser("json", { limit: REQUEST_BODY_LIMIT_BYTES });
 
   app.use(helmet());
   app.setGlobalPrefix(API_GLOBAL_PREFIX);

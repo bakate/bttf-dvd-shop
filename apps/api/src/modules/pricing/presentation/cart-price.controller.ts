@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   HttpCode,
@@ -12,20 +11,23 @@ import {
   ApiBody,
   ApiOkResponse,
   ApiOperation,
+  ApiPayloadTooLargeResponse,
   ApiTags,
 } from "@nestjs/swagger";
 
 import {
-  type ApiErrorCode,
-  createApiErrorBody,
-} from "../../../shared/presentation/api-error";
+  PROBLEM_JSON_MEDIA_TYPE,
+  ProblemDetailsException,
+  problemDetailsOpenApiSchema,
+  requestProblems,
+} from "../../../shared/presentation/problem-details";
 import {
   type PriceCartError,
   PriceCartUseCase,
 } from "../application/price-cart.use-case";
 import type { PriceBreakdown } from "../domain/cart-pricing";
 import { CURRENCY } from "../domain/euro-cents";
-import { splitBasketLines } from "./basket-lines";
+import { type BasketError, readBasketLines } from "./basket-lines";
 import {
   apiKindByMovieKind,
   type CartPriceResponse,
@@ -35,9 +37,27 @@ import {
 } from "./cart-price.schemas";
 import { CART_CONTROLLER_PATH, CART_PRICE_PATH } from "./cart-routes";
 
-const apiErrorCodeByPriceCartError = {
-  "cart/empty": "VALIDATION_FAILED",
-} as const satisfies Record<PriceCartError["code"], ApiErrorCode>;
+type CartError = BasketError | PriceCartError;
+
+// RFC 9457: clients match on `type`, so a published cart error code never changes.
+const problemTitleByCartError = {
+  "cart/empty": "The cart has no movie.",
+  "cart/too-many-lines": "The basket has too many lines.",
+  "cart/line-too-long": "A basket line is too long.",
+} as const satisfies Record<CartError["code"], string>;
+
+function toCartProblem(error: CartError): ProblemDetailsException {
+  return new ProblemDetailsException({
+    type: error.code,
+    title: problemTitleByCartError[error.code],
+    status: HttpStatus.BAD_REQUEST,
+    detail: error.message,
+  });
+}
+
+function problemResponse(schema: object) {
+  return { content: { [PROBLEM_JSON_MEDIA_TYPE]: { schema } } };
+}
 
 function toCartPriceResponse(breakdown: PriceBreakdown): CartPriceResponse {
   return {
@@ -72,25 +92,48 @@ export class CartPriceController {
     description: "The cart price.",
     schema: cartPriceResponseOpenApiSchema,
   })
-  @ApiBadRequestResponse({ description: "The cart cannot be priced." })
+  @ApiBadRequestResponse({
+    description: "The request or the cart cannot be priced.",
+    ...problemResponse(
+      problemDetailsOpenApiSchema({
+        types: [
+          ...Object.keys(problemTitleByCartError),
+          requestProblems.invalid.type,
+        ],
+        status: HttpStatus.BAD_REQUEST,
+      }),
+    ),
+  })
+  @ApiPayloadTooLargeResponse({
+    description: "The request body is too large.",
+    ...problemResponse(
+      problemDetailsOpenApiSchema({
+        types: [requestProblems.tooLarge.type],
+        status: HttpStatus.PAYLOAD_TOO_LARGE,
+      }),
+    ),
+  })
   price(@Body() body: unknown): CartPriceResponse {
     const request = cartPriceRequestSchema.safeParse(body);
 
     if (!request.success) {
-      throw new BadRequestException();
+      throw new ProblemDetailsException({
+        ...requestProblems.invalid,
+        status: HttpStatus.BAD_REQUEST,
+        detail: "The body must be a JSON object with a string basket.",
+      });
     }
 
-    const result = this.priceCart.execute(
-      splitBasketLines(request.data.basket),
-    );
+    const lines = readBasketLines(request.data.basket);
+
+    if (!lines.success) {
+      throw toCartProblem(lines.error);
+    }
+
+    const result = this.priceCart.execute(lines.value);
 
     if (!result.success) {
-      throw new BadRequestException(
-        createApiErrorBody({
-          code: apiErrorCodeByPriceCartError[result.error.code],
-          message: result.error.message,
-        }),
-      );
+      throw toCartProblem(result.error);
     }
 
     return toCartPriceResponse(result.value);

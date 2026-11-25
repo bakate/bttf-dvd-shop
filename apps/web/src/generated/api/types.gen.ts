@@ -37,10 +37,44 @@ export type CartPriceControllerPriceData = {
 
 export type CartPriceControllerPriceErrors = {
     /**
-     * The cart cannot be priced.
+     * The request or the cart cannot be priced.
      */
-    400: unknown;
+    400: {
+        /**
+         * Stable code of the problem, to match on.
+         */
+        type: 'cart/empty' | 'cart/too-many-lines' | 'cart/line-too-long' | 'request/invalid';
+        /**
+         * English summary of the type.
+         */
+        title: string;
+        status: 400;
+        /**
+         * English explanation of this occurrence, for debugging.
+         */
+        detail: string;
+    };
+    /**
+     * The request body is too large.
+     */
+    413: {
+        /**
+         * Stable code of the problem, to match on.
+         */
+        type: 'request/too-large';
+        /**
+         * English summary of the type.
+         */
+        title: string;
+        status: 413;
+        /**
+         * English explanation of this occurrence, for debugging.
+         */
+        detail: string;
+    };
 };
+
+export type CartPriceControllerPriceError = CartPriceControllerPriceErrors[keyof CartPriceControllerPriceErrors];
 
 export type CartPriceControllerPriceResponses = {
     /**

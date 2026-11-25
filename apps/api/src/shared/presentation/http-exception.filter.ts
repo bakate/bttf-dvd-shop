@@ -5,88 +5,90 @@ import {
   HttpException,
   HttpStatus,
 } from "@nestjs/common";
+import { z } from "zod";
 
 import {
-  type ApiErrorBody,
-  createApiErrorBody,
-  isApiErrorBody,
-} from "./api-error";
+  internalProblem,
+  PROBLEM_JSON_MEDIA_TYPE,
+  type ProblemDetails,
+  ProblemDetailsException,
+  type ProblemKind,
+  requestProblems,
+} from "./problem-details";
+
+const requestProblemByStatus = new Map<number, ProblemKind>([
+  [HttpStatus.BAD_REQUEST, requestProblems.invalid],
+  [HttpStatus.NOT_FOUND, requestProblems.notFound],
+  [HttpStatus.PAYLOAD_TOO_LARGE, requestProblems.tooLarge],
+  [HttpStatus.TOO_MANY_REQUESTS, requestProblems.rateLimited],
+]);
+
+// body-parser rejects with http-errors objects, which Nest does not wrap; `expose` marks a client error safe to report.
+const exposedClientErrorSchema = z.object({
+  status: z.number().int().min(400).max(499),
+  expose: z.literal(true),
+});
+
+type ClientError = {
+  readonly status: number;
+  readonly message: string | undefined;
+};
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<HttpResponse>();
-    const statusCode = getStatusCode({ exception });
-    const errorBody = getErrorBody({ exception, statusCode });
+    const problem = toProblemDetails(exception);
 
-    response.status(statusCode).json(errorBody);
+    response.status(problem.status).type(PROBLEM_JSON_MEDIA_TYPE).json(problem);
   }
 }
 
 type HttpResponse = {
-  status(statusCode: number): {
-    json(body: ApiErrorBody): void;
-  };
+  status(statusCode: number): HttpResponse;
+  type(mediaType: string): HttpResponse;
+  json(body: ProblemDetails): void;
 };
 
-function getStatusCode({ exception }: { readonly exception: unknown }): number {
-  if (exception instanceof HttpException) {
-    return exception.getStatus();
+function toProblemDetails(exception: unknown): ProblemDetails {
+  if (exception instanceof ProblemDetailsException) {
+    return exception.problem;
   }
 
-  return HttpStatus.INTERNAL_SERVER_ERROR;
+  const clientError = toClientError(exception);
+
+  if (clientError === undefined) {
+    // Security: an unexpected error's message and stack never reach the response.
+    return {
+      ...internalProblem,
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      detail: "An unexpected error occurred.",
+    };
+  }
+
+  const kind =
+    requestProblemByStatus.get(clientError.status) ?? requestProblems.failed;
+
+  return {
+    ...kind,
+    status: clientError.status,
+    detail: clientError.message ?? kind.title,
+  };
 }
 
-function getErrorBody({
-  exception,
-  statusCode,
-}: {
-  readonly exception: unknown;
-  readonly statusCode: number;
-}): ApiErrorBody {
-  if (!(exception instanceof HttpException)) {
-    return createApiErrorBody({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Internal server error.",
-    });
+function toClientError(exception: unknown): ClientError | undefined {
+  if (exception instanceof HttpException) {
+    const status = exception.getStatus();
+
+    return status < HttpStatus.INTERNAL_SERVER_ERROR
+      ? { status, message: exception.message }
+      : undefined;
   }
 
-  const response = exception.getResponse();
+  const exposedClientError = exposedClientErrorSchema.safeParse(exception);
 
-  if (isApiErrorBody(response)) {
-    return response;
-  }
-
-  if (statusCode === HttpStatus.BAD_REQUEST) {
-    return createApiErrorBody({
-      code: "VALIDATION_FAILED",
-      message: "Request validation failed.",
-    });
-  }
-
-  if (statusCode === HttpStatus.NOT_FOUND) {
-    return createApiErrorBody({
-      code: "NOT_FOUND",
-      message: "Resource not found.",
-    });
-  }
-
-  if (statusCode === HttpStatus.TOO_MANY_REQUESTS) {
-    return createApiErrorBody({
-      code: "RATE_LIMIT_EXCEEDED",
-      message: "Rate limit exceeded.",
-    });
-  }
-
-  if (statusCode >= 400 && statusCode < 500) {
-    return createApiErrorBody({
-      code: "HTTP_ERROR",
-      message: "HTTP request failed.",
-    });
-  }
-
-  return createApiErrorBody({
-    code: "INTERNAL_SERVER_ERROR",
-    message: "Internal server error.",
-  });
+  // Privacy: a parser error message can quote the request body, so it never reaches the response.
+  return exposedClientError.success
+    ? { status: exposedClientError.data.status, message: undefined }
+    : undefined;
 }

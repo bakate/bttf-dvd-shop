@@ -166,7 +166,85 @@
             }
           },
           "400": {
-            "description": "The cart cannot be priced."
+            "description": "The request or the cart cannot be priced.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "cart/empty",
+                        "cart/too-many-lines",
+                        "cart/line-too-long",
+                        "request/invalid"
+                      ],
+                      "description": "Stable code of the problem, to match on."
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "English summary of the type."
+                    },
+                    "status": {
+                      "type": "integer",
+                      "enum": [
+                        400
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "English explanation of this occurrence, for debugging."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is too large.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "request/too-large"
+                      ],
+                      "description": "Stable code of the problem, to match on."
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "English summary of the type."
+                    },
+                    "status": {
+                      "type": "integer",
+                      "enum": [
+                        413
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "English explanation of this occurrence, for debugging."
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Price a cart",

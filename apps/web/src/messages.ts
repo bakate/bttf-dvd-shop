@@ -1,6 +1,15 @@
-import type { CartPriceControllerPriceResponse } from "./generated/api";
+import type {
+  CartPriceControllerPriceError,
+  CartPriceControllerPriceResponse,
+} from "./generated/api";
 
 type MovieKind = CartPriceControllerPriceResponse["lines"][number]["kind"];
+
+// The screen always sends a well-formed body, so `request/invalid` falls back to the generic message.
+type CartProblemType = Exclude<
+  CartPriceControllerPriceError["type"],
+  "request/invalid"
+>;
 
 export const messages = {
   document: {
@@ -17,6 +26,20 @@ export const messages = {
     basketDescription: "Un titre de film par ligne.",
     calculate: "Calculer",
     totalLabel: "Total",
+    errors: {
+      title: "Calcul impossible",
+      byProblemType: {
+        "cart/empty":
+          "Le panier est vide. Saisissez au moins un titre de film.",
+        "cart/too-many-lines":
+          "Le panier contient trop de lignes. Retirez des titres, puis recalculez.",
+        "cart/line-too-long":
+          "Une ligne du panier est trop longue. Vérifiez qu'elle ne contient qu'un titre.",
+        "request/too-large":
+          "Le panier est trop volumineux. Retirez des titres, puis recalculez.",
+      } satisfies Record<CartProblemType, string>,
+      fallback: "Le prix du panier n'a pas pu être calculé. Réessayez.",
+    },
     examples: {
       label: "Exemples du sujet",
       load: (exampleNumber: number) => `Exemple ${exampleNumber}`,
