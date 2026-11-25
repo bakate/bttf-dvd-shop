@@ -110,6 +110,16 @@ describe("Cart pricing screen", () => {
     },
   );
 
+  it("Given the API has not priced the basket yet, when the clerk loads an example, then the basket field still holds the basket being priced", async () => {
+    const shop = createSystemUnderTest();
+    shop.givenTheApiNeverAnswers();
+    await shop.priceBasket("La chèvre");
+
+    await shop.loadExample(1);
+
+    expect(shop.basket()).toBe("La chèvre");
+  });
+
   it("Given a keyboard user, when they tab to the second example and press Enter, then the basket field holds that cart", async () => {
     const shop = createSystemUnderTest();
 
