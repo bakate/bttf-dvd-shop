@@ -22,11 +22,20 @@ Le sujet ne tranche pas ces cas. Les hypothèses retenues ci-dessous restent
 
 1. **Lecture du panier** : un titre par ligne. La casse est ignorée, les
    espaces en début, en fin et répétés aussi, et les lignes vides sont
-   sautées. Aucun alias : « Retour vers le futur » est un film hors saga.
-2. **Appartenance à la saga** : seuls `Back to the Future 1`, `2` et `3`
-   sont des épisodes, à 15 €. Toute autre ligne, y compris
-   `Back to the Future 4` ou `Back to the Future` sans numéro, est un film
-   hors saga à 20 €, jamais remisé.
+   sautées.
+2. **Appartenance à la saga** : un épisode, à 15 €, est reconnu sous le
+   titre anglais du sujet ou sous le titre français des catalogues de la
+   boutique, à l'identique une fois lu :
+   - épisode 1 : `Back to the Future 1`, `Back to the Future`,
+     `Retour vers le futur 1`, `Retour vers le futur` (le titre sans numéro
+     est le titre officiel du premier film) ;
+   - épisode 2 : `Back to the Future 2`, `Back to the Future Part II`,
+     `Retour vers le futur 2`, `Retour vers le futur II` ;
+   - épisode 3 : `Back to the Future 3`, `Back to the Future Part III`,
+     `Retour vers le futur 3`, `Retour vers le futur III`.
+
+   Toute autre ligne, y compris `Retour vers le futur 4`, une faute de
+   frappe ou `BTTF`, est un film hors saga à 20 €, jamais remisé.
 3. **Portée de la remise** : le palier dépend du nombre d'épisodes
    **différents** (2 → 10 %, 3 → 20 %), et le taux s'applique à **tous**
    les DVD de la saga, doublons compris. 1, 2, 3, 2 → (15 × 4) × 0,8 = 48 €.
@@ -222,12 +231,9 @@ Top 10 (2025) à la mesure du projet, et indique les catégories sans objet
 
 - **Plusieurs devises** : remplacer `EuroCents` par un type `Money` qui
   porte sa devise (ADR [0007](docs/adr/0007-integer-cents-single-currency.md)).
-- **Alias de titres** (« Retour vers le futur », « BTTF II ») : un
-  changement du catalogue, pas du calcul (ADR
-  [0008](docs/adr/0008-input-reading-and-saga-membership.md)). La PR
-  [#31](https://github.com/bakate/bttf-dvd-shop/pull/31), en brouillon,
-  reconnaît les titres officiels français et anglais sans toucher au
-  domaine.
+- **Titres approchants** (fautes de frappe, « BTTF II ») : un changement
+  du catalogue, pas du calcul (ADR
+  [0008](docs/adr/0008-input-reading-and-saga-membership.md)).
 - **Tests basés sur les propriétés** (fast-check) : vérifier des invariants
   du calcul (le total ne dépasse jamais la somme des prix unitaires) sur
   des paniers générés.
