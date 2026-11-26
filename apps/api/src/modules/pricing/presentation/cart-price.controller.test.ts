@@ -140,6 +140,27 @@ describe("POST /api/cart/price", () => {
     });
   });
 
+  it("Given a basket with an episode under its French title, when it is priced, then the API answers it as a saga episode under the title typed", async () => {
+    const reply = await api.priceCart({ basket: "Retour vers le futur II" });
+
+    expect(reply).toMatchObject({
+      statusCode: 200,
+      mediaType: "application/json",
+      body: {
+        lines: [
+          {
+            title: "Retour vers le futur II",
+            kind: "saga-episode",
+            unitPrice: 1500,
+            quantity: 1,
+          },
+        ],
+        sagaSubtotal: 1500,
+        regularSubtotal: 0,
+      },
+    });
+  });
+
   it("Given the same regular movie typed in two cases, when it is priced, then it is one line of two copies under the title first typed", async () => {
     const reply = await api.priceCart({ basket: "La chèvre\nLA  CHÈVRE" });
 
