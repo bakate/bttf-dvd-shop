@@ -224,7 +224,10 @@ Top 10 (2025) à la mesure du projet, et indique les catégories sans objet
   porte sa devise (ADR [0007](docs/adr/0007-integer-cents-single-currency.md)).
 - **Alias de titres** (« Retour vers le futur », « BTTF II ») : un
   changement du catalogue, pas du calcul (ADR
-  [0008](docs/adr/0008-input-reading-and-saga-membership.md)).
+  [0008](docs/adr/0008-input-reading-and-saga-membership.md)). La PR
+  [#31](https://github.com/bakate/bttf-dvd-shop/pull/31), en brouillon,
+  reconnaît les titres officiels français et anglais sans toucher au
+  domaine.
 - **Tests basés sur les propriétés** (fast-check) : vérifier des invariants
   du calcul (le total ne dépasse jamais la somme des prix unitaires) sur
   des paniers générés.
