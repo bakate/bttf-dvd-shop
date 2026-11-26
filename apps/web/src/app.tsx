@@ -4,7 +4,7 @@ import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import "./global.css";
 
-import { Anchor, Container, MantineProvider, Title } from "@mantine/core";
+import { Anchor, Container, MantineProvider, Text, Title } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
@@ -35,6 +35,9 @@ export function App() {
           </Anchor>
           <Container component="header" size="md" pt="xl">
             <Title order={1}>{messages.app.title}</Title>
+            <Text c="dimmed" size="lg" mt="xs">
+              {messages.app.tagline}
+            </Text>
           </Container>
           <Container
             component="main"
