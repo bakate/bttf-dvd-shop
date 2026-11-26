@@ -1,7 +1,7 @@
 # BTTF DVD Shop
 
 Application web de calcul du prix d'un panier de DVD, avec la promotion
-_Retour vers le futur_. Le cahier des charges complet est dans l'issue
+_Back to the Future_. Le cahier des charges complet est dans l'issue
 [#1](https://github.com/bakate/bttf-dvd-shop/issues/1).
 
 **Démo** : <https://bttf-dvd-shop.onrender.com>. Le service gratuit de

@@ -13,12 +13,13 @@ type CartProblemType = Exclude<
 
 export const messages = {
   document: {
-    title: "Boutique DVD Retour vers le futur : calcul du panier",
+    title: "Retour en 2000 : boutique DVD et calcul du panier",
     description:
-      "Calculez le prix d'un panier de DVD avec la promotion Retour vers le futur.",
+      "Calculez le prix d'un panier de DVD, promotion Back to the Future comprise.",
   },
   app: {
-    title: "Boutique DVD Retour vers le futur",
+    title: "Retour en 2000",
+    tagline: "Tous vos DVD, et des remises sur la saga Back to the Future.",
   },
   skipLink: "Aller au contenu principal",
   errors: {
