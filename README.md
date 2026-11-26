@@ -14,8 +14,8 @@ débarrassé de son code d'exemple.
 
 ## Hypothèses métier
 
-Le sujet ne tranche pas ces cas. Ces hypothèses ont été envoyées au
-recruteur « sauf avis contraire » (#1) et sont détaillées dans les ADR
+Le sujet ne tranche pas ces cas. Les hypothèses retenues ci-dessous restent
+à valider avec l'équipe de production (#1) ; elles sont détaillées dans les ADR
 [0007](docs/adr/0007-integer-cents-single-currency.md),
 [0008](docs/adr/0008-input-reading-and-saga-membership.md) et
 [0009](docs/adr/0009-discount-tiers-as-data.md).
