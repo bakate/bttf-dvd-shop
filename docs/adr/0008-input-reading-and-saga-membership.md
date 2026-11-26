@@ -7,8 +7,8 @@
 ## Context
 
 Clerks type or paste titles by hand. The brief does not say how to treat
-case, spacing, blank lines or near-miss titles. These assumptions were sent
-to the recruiter "unless you say otherwise" (#1).
+case, spacing, blank lines or near-miss titles. These assumptions are
+pending validation by the production team (#1).
 
 ## Decision
 
